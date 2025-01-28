@@ -22,6 +22,15 @@ TagsJsonReader >> assignTagToModel: tags [
 ]
 
 { #category : 'as yet unclassified' }
+TagsJsonReader >> getBadLabeledImports [
+
+	| imports notLabeled |
+	imports := self getEntitiesWithTagNamed: 'Library Loading'.
+	^ notLabeled := model allImports reject: [ :entity |
+		                imports anySatisfy: [ :import | (import element mooseID) = (entity mooseID). ] ]
+]
+
+{ #category : 'as yet unclassified' }
 TagsJsonReader >> getEntitiesWithTagNamed: aTagName [
 
 	| tag entities |
@@ -86,7 +95,7 @@ TagsJsonReader >> tagImports [
 	modelImports := model allImports.
 	
 	"retunr a tag or create if not found"
-	modelTag := model tagNamed: 'class_loading'.
+	modelTag := model tagNamed: 'Library Loading'.
 
 	modelImports do: [ :entity | entity tagWith: modelTag ] 
 ]
