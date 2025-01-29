@@ -85,7 +85,7 @@ TagsJsonReader >> tagEntitiesFrom: startPos to: endPos with: tag [
 	"retunr a tag or create if not found"
 	modelTag := model tagNamed: tag.
 
-	entities do: [ :entity | entity tagWith: modelTag ]
+	entities do: [ :entity | entity element tagWith: modelTag ]
 ]
 
 { #category : 'as yet unclassified' }
