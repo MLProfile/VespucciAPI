@@ -1,3 +1,17 @@
+"
+```st
+folder := '/Users/cyril/Downloads/profile_labels_export_student_a' asFileReference.
+jsonName := 'profile_labels_export_student_a.json'.
+
+pythonModel := FamixPythonImporter import:  folder.
+
+tagging := TagsJsonReader new
+			model: pythonModel;
+			yourself .
+
+tagging readAndFix: (folder / jsonName).
+```
+"
 Class {
 	#name : 'TagsJsonReader',
 	#superclass : 'Object',
@@ -19,6 +33,23 @@ TagsJsonReader >> assignTagToModel: tags [
 	
 	self tagEntitiesFrom:startPos to: endPos with: tag
 	 
+]
+
+{ #category : 'as yet unclassified' }
+TagsJsonReader >> fixBadImportsIn: aDictionary [
+
+	| missingImports |
+	missingImports := self getBadLabeledImports.
+
+	missingImports do: [ :import |
+		| sourceText |
+		sourceText := import sourceText.
+		(aDictionary at: #labels)
+			detect: [ :entry | ((entry at: #label) = 'Library Loading') not and: [ (entry at: #code) = sourceText ] ]
+			ifFound: [ :entry |
+				entry at: #oldLabel put: (entry at: #label).
+				entry at: #label put: 'Library Loading' ]
+			ifNone: [ self error: 'We have a missing import that does not have any entry with its source text.' ] ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -59,17 +90,28 @@ TagsJsonReader >> read: json [
 		tags do: [ :tag | self assignTagToModel: tag ] ]
 ]
 
+{ #category : 'as yet unclassified' }
+TagsJsonReader >> readAndFix: aFileReference [
+
+	| dictionaryToFix |
+	dictionaryToFix := self readFrom: aFileReference.
+
+	self fixBadImportsIn: dictionaryToFix.
+
+	(aFileReference parent / 'updated_' , aFileReference basename)
+		ensureDelete;
+		writeStreamDo: [ :stream | stream nextPutAll: (NeoJSONWriter toString: dictionaryToFix) ]
+]
+
 { #category : 'instance creation' }
-TagsJsonReader >> readFrom: aFileReference [ 
-	| reader |
+TagsJsonReader >> readFrom: aFileReference [
 
-	filename := aFileReference basename. 
-	reader := NeoJSONReader on: aFileReference readStream.
-	self read: reader next.
-	reader close.
+	| dictionaryToFix |
+	filename := aFileReference basename.
+	dictionaryToFix := (NeoJSONReader on: aFileReference readStream) next.
+	self read: dictionaryToFix.
 
-
-	
+	^ dictionaryToFix
 ]
 
 { #category : 'as yet unclassified' }
