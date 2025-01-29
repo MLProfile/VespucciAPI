@@ -53,6 +53,33 @@ TagsJsonReader >> fixBadImportsIn: aDictionary [
 ]
 
 { #category : 'as yet unclassified' }
+TagsJsonReader >> fixLibraryAndFunctionIn: aDictionary [
+
+	(aDictionary at: #labels)
+		select: [ :entry | (entry at: #label) = 'Library Loading' ]
+		thenDo: [ :entry |
+			| correspondingImport function library |
+			self flag: #todo. "We should factorize that to have the same comparison in #getBadLabeledImports and here."
+			correspondingImport := model allImports detect: [ :import | import sourceText = (entry at: #code) ].
+			function := entry at: #function.
+			"If we have a from import, the function should be the imported entity. Else it should be nil"
+			correspondingImport isFromImport
+				ifTrue: [
+					(function isNotNil and: [ function = correspondingImport importedEntity name ]) ifFalse: [
+						entry at: #oldFunction put: function.
+						entry at: #function put: correspondingImport importedEntity name ] ]
+				ifFalse: [
+					function ifNotNil: [
+						entry at: #oldFunction put: function.
+						entry at: #function put: nil ] ].
+
+			library := entry at: #library.
+			library = correspondingImport importedEntity libraryName ifFalse: [
+				entry at: #oldLibrary put: library.
+				entry at: #library put: correspondingImport importedEntity libraryName ] ]
+]
+
+{ #category : 'as yet unclassified' }
 TagsJsonReader >> getBadLabeledImports [
 
 	| imports notLabeled |
@@ -97,6 +124,8 @@ TagsJsonReader >> readAndFix: aFileReference [
 	dictionaryToFix := self readFrom: aFileReference.
 
 	self fixBadImportsIn: dictionaryToFix.
+	
+	self fixLibraryAndFunctionIn: dictionaryToFix.
 
 	(aFileReference parent / 'updated_' , aFileReference basename)
 		ensureDelete;
