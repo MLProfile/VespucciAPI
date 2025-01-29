@@ -26,8 +26,7 @@ TagsJsonReader >> getBadLabeledImports [
 
 	| imports notLabeled |
 	imports := self getEntitiesWithTagNamed: 'Library Loading'.
-	^ notLabeled := model allImports reject: [ :entity |
-		                imports anySatisfy: [ :import | (import element mooseID) = (entity mooseID). ] ]
+	^ notLabeled := model allImports reject: [ :entity | imports anySatisfy: [ :import | import mooseID = entity mooseID ] ]
 ]
 
 { #category : 'as yet unclassified' }
