@@ -12,7 +12,12 @@ TaggingUtils >> getFuncNameWithTag: afuncTaggedModel [
 	| fonctions dict |
 	fonctions := afuncTaggedModel allFunctions.
 	dict := Dictionary new.
-	fonctions do: [ :func | dict add: func name -> func tags ].
+	"Le but serait d'avoir un nouvel attribut sur toutes les entitees du dictionnaire avant de le renvoyer (FIXME)"
+	fonctions do: [ :func |
+		dict add: func name
+			->
+			(func tags collect: [ :tag | tag attributeAt: #linkedFromExternalModel put: true]). 1halt
+		 ].
 	^ dict
 ]
 
