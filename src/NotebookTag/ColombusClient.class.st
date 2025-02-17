@@ -104,12 +104,6 @@ ColombusClient >> getStepByName: aStepName [
 ]
 
 { #category : 'as yet unclassified' }
-ColombusClient >> getStepByNane: aStepName [
-
-	^ client post: url,'step/' contents: { #name->aStepName} asDictionary.
-]
-
-{ #category : 'as yet unclassified' }
 ColombusClient >> getSteps [ 
 
 	^ client get: url,'steps/' 

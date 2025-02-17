@@ -1,12 +1,32 @@
+"
+## Usage 
+
+vsp := Vespucci new notebookId: 1; yourself.
+""We build the element collection line by line""
+dict := vsp famixElementsByLine: modelA.
+""We call the api to update db with new elements""
+vsp postFamixSg: dict.
+"
 Class {
 	#name : 'Vespucci',
 	#superclass : 'Object',
 	#instVars : [
-		'colombusClient'
+		'colombusClient',
+		'notebookId'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
 }
+
+{ #category : 'as yet unclassified' }
+Vespucci >> checkForInconsistancy: aSgId [ 
+"When we create a new nbElmt we should check if others nbElmt exists with the same SG but a different step"
+
+
+"With the current notebook and the current sgId we can see if others notebooks registers the same sg with another step "
+^aSgId
+
+]
 
 { #category : 'as yet unclassified' }
 Vespucci >> famixElementsByLine: aTaggedFamixPythonModel [
@@ -34,16 +54,31 @@ Vespucci >> initialize [
 	colombusClient := ColombusClient new initClient: 'http://127.0.0.1:8000/'; yourself.
 ]
 
+{ #category : 'accessing' }
+Vespucci >> notebookId [
+
+	^ notebookId
+]
+
+{ #category : 'accessing' }
+Vespucci >> notebookId: anObject [
+
+	notebookId := anObject
+]
+
 { #category : 'as yet unclassified' }
 Vespucci >> postFamixSg: anEntityDict [
 	"We want a line by line dictionnary of model entities : self famixElementsByLine"
 
-	| value |
+	"Probleme de duplication si on repase sur un nb deja traite, on va inserer de nouveau les elmts"
+
+	| value tagId sgId notebookElmt |
 	anEntityDict keysAndValuesDo: [ :key :collec |
 		collec do: [ :fElment |
 			| elem tag source sgFamix |
 			elem := fElment element.
 			tag := elem tags first name.
+			tagId := self tagIdByName: tag.
 			source := elem sourceText.
 
 			"Now here we need to check if this SG exist"
@@ -55,22 +90,7 @@ Vespucci >> postFamixSg: anEntityDict [
 
 			value := colombusClient findSgFamix: sgFamix.
 			colombusClient client isSuccess
-				ifTrue: [
-					| id notebookElmt |
-					"self inform: 'Found a corresponding SG : ',(value asString)."
-					id := value at: 'id'.
-
-					notebookElmt := ColombusModelNbElmt new
-						                notebookId: 1;
-						                "Passer la valeur en global"sousgraphfamix_id:
-							                id;
-						                stepId: 2;
-						                "Request to find the tag id"linestart: key;
-						                lineend: key;
-						                yourself.
-					colombusClient createNbElmt: notebookElmt.
-
-					1 halt ]
+				ifTrue: [ sgId := value at: 'id' ]
 				ifFalse: [
 					| req code |
 					req := colombusClient client.
@@ -78,14 +98,31 @@ Vespucci >> postFamixSg: anEntityDict [
 
 					code = 404 ifFalse: [
 						1 halt "Probably a server side error , should not appen" ].
-					colombusClient createSgFamix: sgFamix.
-					1 halt ]. "here we need to create a new sg"
+					sgId := (colombusClient createSgFamix: sgFamix) at: 'id' ]. "here we need to create a new sg"
 
-			"If it does, is the same tag ?"
+			notebookElmt := ColombusModelNbElmt new
+				                notebookId: notebookId;
+				                "Passer la valeur en global"sousgraphfamix_id:
+					                sgId;
+				                stepId: tagId;
+				                linestart: key;
+				                lineend: key;
+				                yourself.
+			colombusClient createNbElmt: notebookElmt ] ]
+]
 
-			"If not insert a new sub graph and create a new nbElmt"
+{ #category : 'as yet unclassified' }
+Vespucci >> tagIdByName: aTagName [
 
+	| tagId |
+	tagId := colombusClient getStepByName: aTagName.
+	colombusClient client isSuccess ifFalse: [
+		| req code |
+		req := colombusClient client.
+		code := req response statusLine code.
 
+		code = 404 ifFalse: [ Error signal: 'Server problem' ].
+		Error signal: 'Cannot find step (should exist)' ].
 
-			1 halt ] ]
+	^ tagId at: 'id'
 ]
