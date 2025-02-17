@@ -1,3 +1,8 @@
+"
+sgFamix := ColombusModelSg new.
+sgFamix typesgId: 1.
+sgFamix value: (Dictionary new at: 'row' put: 'from datetime import date'; yourself).
+"
 Class {
 	#name : 'ColombusModelSg',
 	#superclass : 'Object',

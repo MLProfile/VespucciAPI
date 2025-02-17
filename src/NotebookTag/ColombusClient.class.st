@@ -9,14 +9,35 @@ Class {
 	#package : 'NotebookTag'
 }
 
+{ #category : 'accessing' }
+ColombusClient >> client [ 
+
+^client
+]
+
 { #category : 'as yet unclassified' }
 ColombusClient >> createNbElmt: aColombusModelNbElmt [
+"
+notebookRequest := ColombusModelNbElmt new.
+notebookRequest notebookId: 1.
+notebookRequest sousgraphfamix_id: 1
+notebookRequest stepId: 2.
+notebookRequest linestart: 5.
+notebookRequest lineend: 5.
+
+self createNbElmt: notebookRequest
+"
+	^ client post: url,'notebook_elements/' contents: aColombusModelNbElmt asDictionary. 
+]
+
+{ #category : 'as yet unclassified' }
+ColombusClient >> createNbElmtS: aColombusModelNbElmtS [
 "
 sgFamix := ColombusModelSg new.
 sgFamix typesgId: 1.
 sgFamix value: (Dictionary new at: 'row' put: 'from datetime import date'; yourself).
 
-notebookRequest := ColombusModelNbElmt new.
+notebookRequest := ColombusModelNbElmtS new.
 notebookRequest notebookId: 1.
 notebookRequest sgFamix: sgFamix
 notebookRequest stepId: 2.
@@ -25,7 +46,7 @@ notebookRequest lineend: 5.
 
 self createNbElmt: notebookRequest
 "
-	^ client post: url,'notebook_elements/simple/' contents: aColombusModelNbElmt asDictionary. 
+	^ client post: url,'notebook_elements/simple/' contents: aColombusModelNbElmtS asDictionary. 
 ]
 
 { #category : 'as yet unclassified' }
@@ -37,6 +58,13 @@ sgFamix value: (Dictionary new at: 'row' put: 'from datetime import date'; yours
 self createSgFamix: sgFamix."
 
 	^ client post: url,'sousgraphfamix/' contents: aSgFamixObj asDictionary. 
+]
+
+{ #category : 'as yet unclassified' }
+ColombusClient >> findSgFamix: aSgFamixModelObj [
+"If sg is find return the id"
+
+	^ client post: url,'sousgraphfamix/search' contents: aSgFamixModelObj asDictionary. 
 ]
 
 { #category : 'as yet unclassified' }

@@ -3,8 +3,7 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'notebookId',
-		'typesgId',
-		'sgFamix',
+		'sousgraphfamix_id',
 		'linestart',
 		'lineend',
 		'stepId'
@@ -13,75 +12,73 @@ Class {
 	#package : 'NotebookTag'
 }
 
-{ #category : 'accessing' }
+{ #category : 'converting' }
 ColombusModelNbElmt >> asDictionary [
     ^ Dictionary new
-        at: 'notebook_id' put: notebookId;
-        at: 'typesg_id' put: sgFamix typesgId ;
-        at: 'sousgraph' put: sgFamix value;
-        at: 'step_id' put: stepId;
+        at: 'idnb' put: notebookId;
+        at: 'sousgraphfamix_id' put: sousgraphfamix_id ;
+        at: 'laststep_id' put: stepId;
         at: 'linestart' put: linestart;
         at: 'lineend' put: lineend;
         yourself.
 ]
 
-{ #category : 'initialization' }
-ColombusModelNbElmt >> initialize [
-    notebookId := nil.
-    stepId := nil.
-	 sgFamix := nil. 
-    linestart := nil.
-    lineend := nil.
-]
-
-{ #category : 'initialization' }
+{ #category : 'accessing' }
 ColombusModelNbElmt >> lineend [
-    ^ lineend.
+
+	^ lineend
 ]
 
 { #category : 'accessing' }
-ColombusModelNbElmt >> lineend: anInteger [
-    lineend := anInteger.
+ColombusModelNbElmt >> lineend: anObject [
+
+	lineend := anObject
 ]
 
-{ #category : 'initialization' }
+{ #category : 'accessing' }
 ColombusModelNbElmt >> linestart [
-    ^ linestart.
+
+	^ linestart
 ]
 
-{ #category : 'initialization' }
-ColombusModelNbElmt >> linestart: anInteger [
-    linestart := anInteger.
+{ #category : 'accessing' }
+ColombusModelNbElmt >> linestart: anObject [
+
+	linestart := anObject
 ]
 
-{ #category : 'initialization' }
+{ #category : 'accessing' }
 ColombusModelNbElmt >> notebookId [
-    ^ notebookId.
-]
 
-{ #category : 'initialization' }
-ColombusModelNbElmt >> notebookId: anInteger [
-    notebookId := anInteger.
+	^ notebookId
 ]
 
 { #category : 'accessing' }
-ColombusModelNbElmt >> sgFamix [
+ColombusModelNbElmt >> notebookId: anObject [
 
-	^ sgFamix
+	notebookId := anObject
 ]
 
 { #category : 'accessing' }
-ColombusModelNbElmt >> sgFamix: aColombusModelSg [
+ColombusModelNbElmt >> sousgraphfamix_id [
 
-	sgFamix := aColombusModelSg .
+	^ sousgraphfamix_id
 ]
 
-{ #category : 'initialization' }
+{ #category : 'accessing' }
+ColombusModelNbElmt >> sousgraphfamix_id: anObject [
+
+	sousgraphfamix_id := anObject
+]
+
+{ #category : 'accessing' }
 ColombusModelNbElmt >> stepId [
-    ^ stepId.
+
+	^ stepId
 ]
 
-{ #category : 'initialization' }
-ColombusModelNbElmt >> stepId: anInteger [
-    stepId := anInteger.
+{ #category : 'accessing' }
+ColombusModelNbElmt >> stepId: anObject [
+
+	stepId := anObject
 ]
