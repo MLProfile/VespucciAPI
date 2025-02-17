@@ -61,6 +61,20 @@ self createSgFamix: sgFamix."
 ]
 
 { #category : 'as yet unclassified' }
+ColombusClient >> findIconsistency: anElmtMissMatchModel [
+
+	^ client post: url,'inconsistencies/find' contents: anElmtMissMatchModel asDictionary. 
+	
+]
+
+{ #category : 'as yet unclassified' }
+ColombusClient >> findIconsistencyOnElmt: anElmtId nbId: aNbId [
+
+	^ client post: url,'inconsistencies/find' contents:  {  #idnb -> aNbId. #idelmt -> anElmtId } asDictionary. 
+	
+]
+
+{ #category : 'as yet unclassified' }
 ColombusClient >> findSgFamix: aSgFamixModelObj [
 "If sg is find return the id"
 

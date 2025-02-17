@@ -1,10 +1,25 @@
 "
 ## Usage 
 
-vsp := Vespucci new notebookId: 1; yourself.
-""We build the element collection line by line""
+pythonModelA := FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/student_a' asFileReference.
+taggedModelA := TagsJsonReader new model: pythonModelA; yourself .
+taggedModelA readFrom: '/Users/mignard/Documents/work/mooseDemo/student_a/profile_labels_export_tp_student_A.json' asFileReference.
+modelA := taggedModelA model.
+
+vsp := Vespucci new.
+vsp notebookId: 1.
 dict := vsp famixElementsByLine: modelA.
-""We call the api to update db with new elements""
+vsp postFamixSg: dict.
+
+
+pythonModelB :=  FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/profile_labels_export_student_b' asFileReference. 
+taggedModelB := TagsJsonReader new model: pythonModelB; yourself .
+taggedModelB readFrom: '/Users/mignard/Documents/work/mooseDemo/profile_labels_export_student_b/profile_labels_export_student_b.json' asFileReference.
+modelB := taggedModelB model.
+
+vsp := Vespucci new.
+vsp notebookId: 2.
+dict := vsp famixElementsByLine: modelB.
 vsp postFamixSg: dict.
 "
 Class {
@@ -19,13 +34,27 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
-Vespucci >> checkForInconsistancy: aSgId [ 
-"When we create a new nbElmt we should check if others nbElmt exists with the same SG but a different step"
+Vespucci >> checkForInconsistancy: aNbElmtId [
+	"When we create a new nbElmt we should check if others nbElmt exists with the same SG but a different step"
 
+	| res inconsistencies |
+	res := colombusClient
+		       findIconsistencyOnElmt: aNbElmtId
+		       nbId: notebookId.
+	colombusClient client isSuccess
+		ifTrue: [
+			inconsistencies := res.
+			1 halt ]
+		ifFalse: [
+			| req code |
+			req := colombusClient client.
+			code := req response statusLine code.
 
-"With the current notebook and the current sgId we can see if others notebooks registers the same sg with another step "
-^aSgId
+			code = 404 ifFalse: [
+				1 halt "Probably a server side error , should not appen" ].
+			inconsistencies := [  ] ].
 
+"If we have inconsistencies we need to create them in db"
 ]
 
 { #category : 'as yet unclassified' }
@@ -72,7 +101,7 @@ Vespucci >> postFamixSg: anEntityDict [
 
 	"Probleme de duplication si on repase sur un nb deja traite, on va inserer de nouveau les elmts"
 
-	| value tagId sgId notebookElmt |
+	| value tagId sgId notebookElmt elmtID |
 	anEntityDict keysAndValuesDo: [ :key :collec |
 		collec do: [ :fElment |
 			| elem tag source sgFamix |
@@ -108,7 +137,8 @@ Vespucci >> postFamixSg: anEntityDict [
 				                linestart: key;
 				                lineend: key;
 				                yourself.
-			colombusClient createNbElmt: notebookElmt ] ]
+			elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
+			self checkForInconsistancy: elmtID ] ]
 ]
 
 { #category : 'as yet unclassified' }
