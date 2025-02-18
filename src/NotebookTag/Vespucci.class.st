@@ -27,7 +27,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'colombusClient',
-		'notebookId'
+		'notebookId',
+		'sgType'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -81,6 +82,7 @@ Vespucci >> famixElementsByLine: aTaggedFamixPythonModel [
 Vespucci >> initialize [ 
 
 	colombusClient := ColombusClient new initClient: 'http://127.0.0.1:8000/'; yourself.
+	sgType := 1
 ]
 
 { #category : 'accessing' }
@@ -112,7 +114,7 @@ Vespucci >> postFamixSg: anEntityDict [
 
 			"Now here we need to check if this SG exist"
 			sgFamix := ColombusModelSg new.
-			sgFamix typesgId: 4. "Actual string value type"
+			sgFamix typesgId: sgType . "Actual string value type"
 			sgFamix value: (Dictionary new
 					 at: 'source' put: source;
 					 yourself).
