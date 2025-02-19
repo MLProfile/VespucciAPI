@@ -1,8 +1,8 @@
 Class {
 	#name : 'BaselineOfNotebookTag',
 	#superclass : 'BaselineOf',
-	#category : 'NotebookTag',
-	#package : 'NotebookTag'
+	#category : 'BaselineOfNotebookTag',
+	#package : 'BaselineOfNotebookTag'
 }
 
 { #category : 'baselines' }
