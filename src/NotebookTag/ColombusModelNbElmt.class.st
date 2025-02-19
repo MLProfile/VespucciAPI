@@ -8,8 +8,9 @@ Class {
 		'lineend',
 		'stepId'
 	],
-	#category : 'NotebookTag',
-	#package : 'NotebookTag'
+	#category : 'NotebookTag-API-Models',
+	#package : 'NotebookTag',
+	#tag : 'API-Models'
 }
 
 { #category : 'converting' }

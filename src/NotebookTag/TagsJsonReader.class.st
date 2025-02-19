@@ -1,4 +1,7 @@
 "
+Warn, json profil should contains detailled metaInstructions
+
+## Usage 
 ```st
 folder := '/Users/cyril/Downloads/profile_labels_export_student_a' asFileReference.
 jsonName := 'profile_labels_export_student_a.json'.

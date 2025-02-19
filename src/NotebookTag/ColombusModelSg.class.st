@@ -10,8 +10,9 @@ Class {
 		'value',
 		'typesgId'
 	],
-	#category : 'NotebookTag',
-	#package : 'NotebookTag'
+	#category : 'NotebookTag-API-Models',
+	#package : 'NotebookTag',
+	#tag : 'API-Models'
 }
 
 { #category : 'evaluating' }

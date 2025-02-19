@@ -81,7 +81,7 @@ Vespucci >> famixElementsByLine: aTaggedFamixPythonModel [
 { #category : 'initialization' }
 Vespucci >> initialize [ 
 
-	colombusClient := ColombusClient new initClient: 'http://127.0.0.1:8000/'; yourself.
+	colombusClient := ColombusClient createClientWithUrl: 'http://127.0.0.1:8000/'; yourself.
 	sgType := 1
 ]
 
