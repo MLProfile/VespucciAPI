@@ -35,6 +35,24 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
+Vespucci >> allImportInAJsonExportedModel: aFileReference [
+"Return each import found in the json"
+
+| export |
+export := (NeoJSONReader on: aFileReference readStream) next.
+^export select: [ :e | (e at:'FM3' ifAbsent: [  ]) = 'Famix-Python-Entities.Import' ] 
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> allInvocationInAJsonExportedModel: aFileReference [
+"Return each Invocation found in the json"
+
+| export |
+export := (NeoJSONReader on: aFileReference readStream) next.
+^export select: [ :e | (e at:'FM3' ifAbsent: [  ]) = 'Famix-Python-Entities.Invocation' ] 
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci >> buildFamixModelWithAttributes: aTaggedFamixPythonModel [
 
 	| model |
@@ -42,9 +60,13 @@ Vespucci >> buildFamixModelWithAttributes: aTaggedFamixPythonModel [
 
 	model allImports do: [ :i |
 		i importOf: i importedEntity name.
-		i package: (self parentPackageOfAnImport: i) ].
+		i package: (self parentPackageOfAnImport: i).
+		i startPos: i sourceAnchor startPos asString.
+		i endPos: i sourceAnchor endPos asString ].
+
 	self flag: #todo.
-	"Add module when we can (from import)"
+	"If we have a shadowing entity, candidtes may be multiple we should probably check"
+	"We also need to find a way to get the parent package of this candidate"
 	model allInvocations do: [ :i |
 		i function: i candidates first name.
 		i arguments: i computeArgs asStringWithCr ]
@@ -72,6 +94,19 @@ Vespucci >> checkForInconsistancy: aNbElmtId [
 			inconsistencies := [  ] ].
 
 "If we have inconsistencies we need to create them in db"
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> exportToJSON: aModelWithAttributes [
+
+	| localfileReference |
+	localfileReference := FileReference
+		                      newTempFilePrefix: 'pythonModel-'
+		                      suffix: '-export.json'.
+
+	localfileReference writeStreamDo: [ :aStream |
+		aModelWithAttributes exportToJSONStream: aStream ].
+	^ localfileReference
 ]
 
 { #category : 'as yet unclassified' }
