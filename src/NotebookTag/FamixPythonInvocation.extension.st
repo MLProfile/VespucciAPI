@@ -15,6 +15,21 @@ FamixPythonInvocation >> arguments: anArgumentcollection [
 ]
 
 { #category : '*NotebookTag' }
+FamixPythonInvocation >> computeArgs [
+
+	| text start end paramsAsString res |
+	
+	self flag: #todo. 
+	"If we have methods or func as arguments the parenthesis break this compute : model.compile(optimizer=optimizers.Adam(), loss=losses.sparse_categorical_crossentropy, metrics=[""accuracy""])"
+	text := self sourceAnchor sourceText.
+	start := text indexOf: $(.
+	end := text indexOf: $).
+	paramsAsString := text copyFrom: start + 1 to: end - 1.
+	res := paramsAsString splitOn: $,.
+	^ res collect: [ :each | each trim ]
+]
+
+{ #category : '*NotebookTag' }
 FamixPythonInvocation >> function [ 
 
     <FMProperty: #function type: #String>

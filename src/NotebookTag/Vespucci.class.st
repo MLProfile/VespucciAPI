@@ -40,8 +40,14 @@ Vespucci >> buildFamixModelWithAttributes: aTaggedFamixPythonModel [
 	| model |
 	model := aTaggedFamixPythonModel. "Surtout pas de copie ici pour le coup"
 
-	model allImports do: [ :i | i importOf: i importedEntity name. i package: (self parentPackageOfAnImport: i) ].
-
+	model allImports do: [ :i |
+		i importOf: i importedEntity name.
+		i package: (self parentPackageOfAnImport: i) ].
+	self flag: #todo.
+	"Add module when we can (from import)"
+	model allInvocations do: [ :i |
+		i function: i candidates first name.
+		i arguments: i computeArgs asStringWithCr ]
 ]
 
 { #category : 'as yet unclassified' }
