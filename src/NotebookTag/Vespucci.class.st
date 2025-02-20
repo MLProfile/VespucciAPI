@@ -35,6 +35,16 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
+Vespucci >> buildFamixModelWithAttributes: aTaggedFamixPythonModel [
+
+	| model |
+	model := aTaggedFamixPythonModel. "Surtout pas de copie ici pour le coup"
+
+	model allImports do: [ :i | i importOf: i importedEntity name. i package: (self parentPackageOfAnImport: i) ].
+
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci >> checkForInconsistancy: aNbElmtId [
 	"When we create a new nbElmt we should check if others nbElmt exists with the same SG but a different step"
 
@@ -95,6 +105,28 @@ Vespucci >> notebookId [
 Vespucci >> notebookId: anObject [
 
 	notebookId := anObject
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> parentPackageOfAnImport: anImport [
+	"An imported entity can come from a package"
+
+	"Actually we can have package chain sklearn.preprocessing.blabla we will need to handle this"
+
+	| importedEntity |
+	importedEntity := anImport importedEntity.
+
+	^ String streamContents: [ :aStream |
+		  | segments |
+		  segments := OrderedCollection new.
+		  importedEntity parentPackage ifNotNil: [
+			  segments addFirst: importedEntity parentPackage name.
+			  importedEntity parentPackage parentPackage ifNotNil: [
+				  segments addFirst:
+					  importedEntity parentPackage parentPackage name ] ].
+		  segments doWithIndex: [ :each :index |
+			  aStream nextPutAll: each.
+			  index < segments size ifTrue: [ aStream nextPut: $. ] ] ]
 ]
 
 { #category : 'as yet unclassified' }
