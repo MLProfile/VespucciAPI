@@ -230,41 +230,39 @@ Vespucci >> postImports [
 		tagId := self tagIdByName: tag.
 		lineStart := famixImport first sourceAnchor startLine.
 		lineEnd := famixImport first sourceAnchor endLine.
-		
+
 		"Now here we need to check if this SG exist"
 		sgFamix := ColombusModelSg new.
-		sgFamix typesgId: sgType . "We need to request the id where value is famix python import"
+		sgFamix typesgId: sgType. "We need to request the id where value is famix python import"
 		i removeKey: 'id' ifAbsent: [  ].
 		i removeKey: 'endPos' ifAbsent: [  ].
-		i removeKey: 'startPos' ifAbsent: [  ]. 
+		i removeKey: 'startPos' ifAbsent: [  ].
 		i removeKey: 'importedEntity' ifAbsent: [  ].
 		i removeKey: 'importingEntity' ifAbsent: [  ].
 		i removeKey: 'allTagAssociations' ifAbsent: [  ].
-		sgFamix value: i .
+		sgFamix value: i.
 
 		value := colombusClient findSgFamix: sgFamix.
-			colombusClient client isSuccess
-				ifTrue: [ sgId := value at: 'id' ]
-				ifFalse: [
-					| req code |
-					req := colombusClient client.
-					code := req response statusLine code.
+		colombusClient client isSuccess
+			ifTrue: [ sgId := value at: 'id' ]
+			ifFalse: [
+				| req code |
+				req := colombusClient client.
+				code := req response statusLine code.
 
-					code = 404 ifFalse: [
-						1 halt "Probably a server side error , should not appen" ].
-					sgId := (colombusClient createSgFamix: sgFamix) at: 'id' ]. "here we need to create a new sg"
+				code = 404 ifFalse: [
+					1 halt "Probably a server side error , should not appen" ].
+				sgId := (colombusClient createSgFamix: sgFamix) at: 'id' ]. "here we need to create a new sg"
 
-			notebookElmt := ColombusModelNbElmt new
-				                notebookId: notebookId;
-				                sousgraphfamix_id: sgId;
-				                stepId: tagId;
-				                linestart: lineStart ;
-				                lineend: lineEnd;
-				                yourself.
-			elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
-		
-		
-		1 halt ].
+		notebookElmt := ColombusModelNbElmt new
+			                notebookId: notebookId;
+			                sousgraphfamix_id: sgId;
+			                stepId: tagId;
+			                linestart: lineStart;
+			                lineend: lineEnd;
+			                yourself.
+		elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
+		self checkForInconsistancy: elmtID ].
 
 	^ jsonImports
 ]
