@@ -30,6 +30,20 @@ FamixPythonInvocation >> computeArgs [
 ]
 
 { #category : '*NotebookTag' }
+FamixPythonInvocation >> endPos [ 
+
+    <FMProperty: #endPos type: #String>
+    <FMComment: 'endPos of this entity'>
+    ^ self attributeAt: #endPos ifAbsent: [  ]
+]
+
+{ #category : '*NotebookTag' }
+FamixPythonInvocation >> endPos: aPosString [ 
+
+    self attributeAt: #endPos put: aPosString.
+]
+
+{ #category : '*NotebookTag' }
 FamixPythonInvocation >> function [ 
 
     <FMProperty: #function type: #String>
@@ -55,4 +69,18 @@ FamixPythonInvocation >> library [
 FamixPythonInvocation >> library: aLibraryName [ 
 
     self attributeAt: #library put: aLibraryName.
+]
+
+{ #category : '*NotebookTag' }
+FamixPythonInvocation >> startPos [ 
+
+    <FMProperty: #startPos type: #String>
+    <FMComment: 'startPos of this entity'>
+    ^ self attributeAt: #startPos ifAbsent: [  ]
+]
+
+{ #category : '*NotebookTag' }
+FamixPythonInvocation >> startPos: aPosString [ 
+
+    self attributeAt: #startPos put: aPosString.
 ]

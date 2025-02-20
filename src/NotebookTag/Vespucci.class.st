@@ -2,25 +2,18 @@
 ## Usage 
 
 pythonModelA := FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/student_a' asFileReference.
+
 taggedModelA := TagsJsonReader new model: pythonModelA; yourself .
 taggedModelA readFrom: '/Users/mignard/Documents/work/mooseDemo/student_a/profile_labels_export_tp_student_A.json' asFileReference.
 modelA := taggedModelA model.
 
+
 vsp := Vespucci new.
 vsp notebookId: 1.
-dict := vsp famixElementsByLine: modelA.
-vsp postFamixSg: dict.
-
-
-pythonModelB :=  FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/profile_labels_export_student_b' asFileReference. 
-taggedModelB := TagsJsonReader new model: pythonModelB; yourself .
-taggedModelB readFrom: '/Users/mignard/Documents/work/mooseDemo/profile_labels_export_student_b/profile_labels_export_student_b.json' asFileReference.
-modelB := taggedModelB model.
-
-vsp := Vespucci new.
-vsp notebookId: 2.
-dict := vsp famixElementsByLine: modelB.
-vsp postFamixSg: dict.
+vsp taggedModel: modelA.
+vsp buildFamixModelWithAttributes: modelA .
+vsp exportToJSON: modelA.
+vsp postImports 
 "
 Class {
 	#name : 'Vespucci',
@@ -28,7 +21,9 @@ Class {
 	#instVars : [
 		'colombusClient',
 		'notebookId',
-		'sgType'
+		'sgType',
+		'localfileReference',
+		'taggedModel'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -67,9 +62,12 @@ Vespucci >> buildFamixModelWithAttributes: aTaggedFamixPythonModel [
 	self flag: #todo.
 	"If we have a shadowing entity, candidtes may be multiple we should probably check"
 	"We also need to find a way to get the parent package of this candidate"
+	"See with cyril, will be good in some time"
 	model allInvocations do: [ :i |
 		i function: i candidates first name.
-		i arguments: i computeArgs asStringWithCr ]
+		i arguments: i computeArgs asStringWithCr.
+		i startPos: i sourceAnchor startPos asString.
+		i endPos: i sourceAnchor endPos asString ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -99,11 +97,6 @@ Vespucci >> checkForInconsistancy: aNbElmtId [
 { #category : 'as yet unclassified' }
 Vespucci >> exportToJSON: aModelWithAttributes [
 
-	| localfileReference |
-	localfileReference := FileReference
-		                      newTempFilePrefix: 'pythonModel-'
-		                      suffix: '-export.json'.
-
 	localfileReference writeStreamDo: [ :aStream |
 		aModelWithAttributes exportToJSONStream: aStream ].
 	^ localfileReference
@@ -132,7 +125,10 @@ Vespucci >> famixElementsByLine: aTaggedFamixPythonModel [
 { #category : 'initialization' }
 Vespucci >> initialize [ 
 
-	colombusClient := ColombusClient createClientWithUrl: 'http://127.0.0.1:8000/'; yourself.
+	colombusClient := ColombusClient createClientWithUrl: 'http://127.0.0.1:8000/'.
+	localfileReference := FileReference
+		                      newTempFilePrefix: 'pythonModel-'
+		                      suffix: '-export.json'.
 	sgType := 1
 ]
 
@@ -217,6 +213,63 @@ Vespucci >> postFamixSg: anEntityDict [
 ]
 
 { #category : 'as yet unclassified' }
+Vespucci >> postImports [
+
+	| jsonImports modelImport tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID |
+	jsonImports := self allImportInAJsonExportedModel: localfileReference.
+	modelImport := taggedModel allImports.
+	jsonImports do: [ :i |
+		| famixImport |
+		famixImport := modelImport select: [ :importEntity |
+			               importEntity sourceAnchor startPos asString
+			               = (i at: 'startPos') and: [
+				               importEntity sourceAnchor endPos asString
+				               = (i at: 'endPos') ] ].
+		"We can have multiple entities in the same sourceAnchors pos but the tag will be the same so I just lookup for the firstone"
+		tag := famixImport first tags first name.
+		tagId := self tagIdByName: tag.
+		lineStart := famixImport first sourceAnchor startLine.
+		lineEnd := famixImport first sourceAnchor endLine.
+		
+		"Now here we need to check if this SG exist"
+		sgFamix := ColombusModelSg new.
+		sgFamix typesgId: sgType . "We need to request the id where value is famix python import"
+		i removeKey: 'id' ifAbsent: [  ].
+		i removeKey: 'endPos' ifAbsent: [  ].
+		i removeKey: 'startPos' ifAbsent: [  ]. 
+		i removeKey: 'importedEntity' ifAbsent: [  ].
+		i removeKey: 'importingEntity' ifAbsent: [  ].
+		i removeKey: 'allTagAssociations' ifAbsent: [  ].
+		sgFamix value: i .
+
+		value := colombusClient findSgFamix: sgFamix.
+			colombusClient client isSuccess
+				ifTrue: [ sgId := value at: 'id' ]
+				ifFalse: [
+					| req code |
+					req := colombusClient client.
+					code := req response statusLine code.
+
+					code = 404 ifFalse: [
+						1 halt "Probably a server side error , should not appen" ].
+					sgId := (colombusClient createSgFamix: sgFamix) at: 'id' ]. "here we need to create a new sg"
+
+			notebookElmt := ColombusModelNbElmt new
+				                notebookId: notebookId;
+				                sousgraphfamix_id: sgId;
+				                stepId: tagId;
+				                linestart: lineStart ;
+				                lineend: lineEnd;
+				                yourself.
+			elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
+		
+		
+		1 halt ].
+
+	^ jsonImports
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci >> tagIdByName: aTagName [
 
 	| tagId |
@@ -230,4 +283,16 @@ Vespucci >> tagIdByName: aTagName [
 		Error signal: 'Cannot find step (should exist)' ].
 
 	^ tagId at: 'id'
+]
+
+{ #category : 'accessing' }
+Vespucci >> taggedModel [
+
+	^ taggedModel 
+]
+
+{ #category : 'accessing' }
+Vespucci >> taggedModel: aFamixPythonTaggedModel [
+
+	taggedModel := aFamixPythonTaggedModel
 ]
