@@ -143,9 +143,22 @@ ColombusClient >> getStepById: aStepId [
 ]
 
 { #category : 'step' }
-ColombusClient >> getStepByName: aStepName [
+ColombusClient >> getStepIdByName: aStepName [
 
-	^ client post: url,'step/' contents: { #name->aStepName} asDictionary.
+	| res |
+	res := client
+		       post: url , 'step/'
+		       contents: { (#name -> aStepName) } asDictionary.
+	self client isSuccess ifFalse: [
+		| req code |
+		req := self client.
+		code := req response statusLine code.
+
+		code = 404 ifFalse: [
+			Error signal: 'HTTP:' , code asString , 'Server problem' ].
+		Error signal: 'Cannot find step (should exist)' ].
+
+	^ res at: 'id'
 ]
 
 { #category : 'step' }

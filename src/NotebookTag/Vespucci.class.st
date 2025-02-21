@@ -196,7 +196,7 @@ Vespucci >> postFamixSg: anEntityDict [
 			| elem tag source sgFamix |
 			elem := fElment element.
 			tag := elem tags first name.
-			tagId := self tagIdByName: tag.
+			tagId := colombusClient getStepIdByName: tag.
 			source := elem sourceText.
 
 			"Now here we need to check if this SG exist"
@@ -249,7 +249,7 @@ Vespucci >> postImports [
 				               = (i at: 'endPos') ] ].
 		"We can have multiple entities in the same sourceAnchors pos but the tag will be the same so I just lookup for the firstone"
 		tag := famixImport first tags first name.
-		tagId := self tagIdByName: tag.
+		tagId := colombusClient getStepIdByName: tag.
 		lineStart := famixImport first sourceAnchor startLine.
 		lineEnd := famixImport first sourceAnchor endLine.
 
@@ -306,7 +306,7 @@ Vespucci >> postInvocations [
 				               = (i at: 'endPos') ] ].
 
 		tag := famixInvocation first tags first name.
-		tagId := self tagIdByName: tag.
+		tagId := colombusClient getStepIdByName: tag.
 		lineStart := famixInvocation first sourceAnchor startLine.
 		lineEnd := famixInvocation first sourceAnchor endLine.
 
@@ -346,24 +346,6 @@ Vespucci >> postInvocations [
 		elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
 		self checkForInconsistancy: elmtID ].
 
-]
-
-{ #category : 'as yet unclassified' }
-Vespucci >> tagIdByName: aTagName [
-
-	| tagId |
-	self flag: #TODO.
-	"This method should be in ColombusClient"
-	tagId := colombusClient getStepByName: aTagName.
-	colombusClient client isSuccess ifFalse: [
-		| req code |
-		req := colombusClient client.
-		code := req response statusLine code.
-
-		code = 404 ifFalse: [ Error signal: 'Server problem' ].
-		Error signal: 'Cannot find step (should exist)' ].
-
-	^ tagId at: 'id'
 ]
 
 { #category : 'accessing' }
