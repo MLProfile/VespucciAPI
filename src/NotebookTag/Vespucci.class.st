@@ -268,6 +268,61 @@ Vespucci >> postImports [
 ]
 
 { #category : 'as yet unclassified' }
+Vespucci >> postInvocations [
+
+	|  tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID jsonInvocation modelInvocations |
+	jsonInvocation := self allInvocationInAJsonExportedModel: localfileReference.
+	modelInvocations := taggedModel allInvocations.
+	jsonInvocation do: [ :i |
+		| famixInvocation |
+		famixInvocation := modelInvocations select: [ :invocationEntity |
+			               invocationEntity sourceAnchor startPos asString
+			               = (i at: 'startPos') and: [
+				               invocationEntity sourceAnchor endPos asString
+				               = (i at: 'endPos') ] ].
+		1halt.
+		tag := famixInvocation first tags first name.
+		tagId := self tagIdByName: tag.
+		lineStart := famixInvocation first sourceAnchor startLine.
+		lineEnd := famixInvocation first sourceAnchor endLine.
+
+		"Now here we need to check if this SG exist"
+		sgFamix := ColombusModelSg new.
+		sgFamix typesgId: sgType. "We need to request the id where value is famix python invocation"
+		i removeKey: 'id' ifAbsent: [  ].
+		i removeKey: 'endPos' ifAbsent: [  ].
+		i removeKey: 'startPos' ifAbsent: [  ].
+		i removeKey: 'sender' ifAbsent: [  ].
+		i removeKey: 'candidates' ifAbsent: [  ].
+		i removeKey: 'signature' ifAbsent: [  ].
+		i removeKey: 'allTagAssociations' ifAbsent: [  ].
+		sgFamix value: i.
+
+		value := colombusClient findSgFamix: sgFamix.
+		colombusClient client isSuccess
+			ifTrue: [ sgId := value at: 'id' ]
+			ifFalse: [
+				| req code |
+				req := colombusClient client.
+				code := req response statusLine code.
+
+				code = 404 ifFalse: [
+					1 halt "Probably a server side error , should not appen" ].
+				sgId := (colombusClient createSgFamix: sgFamix) at: 'id' ]. "here we need to create a new sg"
+
+		notebookElmt := ColombusModelNbElmt new
+			                notebookId: notebookId;
+			                sousgraphfamix_id: sgId;
+			                stepId: tagId;
+			                linestart: lineStart;
+			                lineend: lineEnd;
+			                yourself.
+		elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
+		self checkForInconsistancy: elmtID ].
+
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci >> tagIdByName: aTagName [
 
 	| tagId |
