@@ -75,7 +75,7 @@ Vespucci >> buildFamixModelWithAttributes [
 
 	model allImports do: [ :i |
 		i importOf: i importedEntity name.
-		i package: (self parentPackageOfAnImport: i).
+		i package: (i importedEntity libraryName).
 		i startPos: i sourceAnchor startPos asString.
 		i endPos: i sourceAnchor endPos asString ].
 
@@ -94,24 +94,15 @@ Vespucci >> buildFamixModelWithAttributes [
 Vespucci >> checkForInconsistancy: aNbElmtId [
 	"When we create a new nbElmt we should check if others nbElmt exists with the same SG but a different step"
 
-	| res inconsistencies |
-	res := colombusClient
-		       findIconsistencyOnElmt: aNbElmtId
-		       nbId: notebookId.
-	colombusClient client isSuccess
-		ifTrue: [
-			inconsistencies := res.
-			1 halt ]
-		ifFalse: [
-			| req code |
-			req := colombusClient client.
-			code := req response statusLine code.
+	| inconsistencies |
+	inconsistencies := colombusClient
+		                   findIconsistencyOnElmt: aNbElmtId
+		                   nbId: notebookId.
+	inconsistencies isNotEmpty ifTrue: [ 1 halt ]
 
-			code = 404 ifFalse: [
-				1 halt "Probably a server side error , should not appen" ].
-			inconsistencies := [  ] ].
-
-"If we have inconsistencies we need to create them in db"
+	"If we have inconsistencies we need to create them in db"
+	"Creation of an inconsistency with a name"
+	"Creation of two inconsistency element with previous inconsistency id and nbElmt id"
 ]
 
 { #category : 'as yet unclassified' }
@@ -162,28 +153,6 @@ Vespucci >> notebookId [
 Vespucci >> notebookId: anObject [
 
 	notebookId := anObject
-]
-
-{ #category : 'as yet unclassified' }
-Vespucci >> parentPackageOfAnImport: anImport [
-	"An imported entity can come from a package"
-
-	"Actually we can have package chain sklearn.preprocessing.blabla we will need to handle this"
-
-	| importedEntity |
-	importedEntity := anImport importedEntity.
-
-	^ String streamContents: [ :aStream |
-		  | segments |
-		  segments := OrderedCollection new.
-		  importedEntity parentPackage ifNotNil: [
-			  segments addFirst: importedEntity parentPackage name.
-			  importedEntity parentPackage parentPackage ifNotNil: [
-				  segments addFirst:
-					  importedEntity parentPackage parentPackage name ] ].
-		  segments doWithIndex: [ :each :index |
-			  aStream nextPutAll: each.
-			  index < segments size ifTrue: [ aStream nextPut: $. ] ] ]
 ]
 
 { #category : 'as yet unclassified' }

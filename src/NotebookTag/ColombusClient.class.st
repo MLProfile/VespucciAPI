@@ -93,8 +93,23 @@ ColombusClient >> findIconsistency: anElmtMissMatchModel [
 { #category : 'inconsistency' }
 ColombusClient >> findIconsistencyOnElmt: anElmtId nbId: aNbId [
 
-	^ client post: url,'inconsistencies/find' contents:  {  #idnb -> aNbId. #idelmt -> anElmtId } asDictionary. 
-	
+	| res inconsistencies |
+	res := client post: url , 'inconsistencies/find' contents: {
+			       (#idnb -> aNbId).
+			       (#idelmt -> anElmtId) } asDictionary.
+	self client isSuccess
+		ifTrue: [ inconsistencies := res ]
+		ifFalse: [
+			| req code |
+			req := self client.
+			code := req response statusLine code.
+
+			code = 404 ifFalse: [
+				Error signal: 'HTTP:' , code asString , 'Server problem'.
+				"Probably a server side error , should not appen" ].
+			inconsistencies := {  } ].
+
+	^ inconsistencies
 ]
 
 { #category : 'sousGraph' }
