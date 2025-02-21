@@ -30,6 +30,26 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
+Vespucci class >> uploadAndComputeNotebookWithId: aNotebookId fromTaggedModel: aFamixPythonTaggedModel [
+	"Here we want a famix python model tagged with TagsJSonReader
+pythonModelA := FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/student_a' asFileReference.
+
+taggedModelA := TagsJsonReader new model: pythonModelA; yourself .
+taggedModelA readFrom: '/Users/mignard/Documents/work/mooseDemo/student_a/profile_labels_export_tp_student_A.json' asFileReference.
+modelA := taggedModelA model.
+"
+
+	^ self new
+		  notebookId: aNotebookId;
+		  taggedModel: aFamixPythonTaggedModel;
+		  buildFamixModelWithAttributes;
+		  exportToJSON;
+		  postImports;
+		  postInvocations;
+		  yourself
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci >> allImportInAJsonExportedModel: aFileReference [
 "Return each import found in the json"
 
@@ -48,10 +68,10 @@ export := (NeoJSONReader on: aFileReference readStream) next.
 ]
 
 { #category : 'as yet unclassified' }
-Vespucci >> buildFamixModelWithAttributes: aTaggedFamixPythonModel [
+Vespucci >> buildFamixModelWithAttributes [
 
 	| model |
-	model := aTaggedFamixPythonModel. "Surtout pas de copie ici pour le coup"
+	model := taggedModel. "Surtout pas de copie ici pour le coup"
 
 	model allImports do: [ :i |
 		i importOf: i importedEntity name.
@@ -95,10 +115,11 @@ Vespucci >> checkForInconsistancy: aNbElmtId [
 ]
 
 { #category : 'as yet unclassified' }
-Vespucci >> exportToJSON: aModelWithAttributes [
+Vespucci >> exportToJSON [
+"We need to run self buildFamixModelWithAttributes first"
 
 	localfileReference writeStreamDo: [ :aStream |
-		aModelWithAttributes exportToJSONStream: aStream ].
+		taggedModel exportToJSONStream: aStream ].
 	^ localfileReference
 ]
 
@@ -106,7 +127,7 @@ Vespucci >> exportToJSON: aModelWithAttributes [
 Vespucci >> famixElementsByLine: aTaggedFamixPythonModel [
 
 	| source dictionary model |
-	model := aTaggedFamixPythonModel. "Besoin de faire une copy"
+	model := aTaggedFamixPythonModel. "Besoin de faire une copy pour eviter de faire sauter le premier element d'un model (on l'enleve parce que c'est le module em lui meme)"
 	source := (model allUsing: FamixTFileAnchor)
 		          remove:
 		          (model allUsing: FamixTFileAnchor) first.
@@ -129,7 +150,6 @@ Vespucci >> initialize [
 	localfileReference := FileReference
 		                      newTempFilePrefix: 'pythonModel-'
 		                      suffix: '-export.json'.
-	sgType := 1
 ]
 
 { #category : 'accessing' }
@@ -170,9 +190,7 @@ Vespucci >> parentPackageOfAnImport: anImport [
 Vespucci >> postFamixSg: anEntityDict [
 	"We want a line by line dictionnary of model entities : self famixElementsByLine"
 
-	"Probleme de duplication si on repase sur un nb deja traite, on va inserer de nouveau les elmts"
-
-	| value tagId sgId notebookElmt elmtID |
+	| value tagId sgId notebookElmt elmtID sgType |
 	anEntityDict keysAndValuesDo: [ :key :collec |
 		collec do: [ :fElment |
 			| elem tag source sgFamix |
@@ -183,7 +201,11 @@ Vespucci >> postFamixSg: anEntityDict [
 
 			"Now here we need to check if this SG exist"
 			sgFamix := ColombusModelSg new.
-			sgFamix typesgId: sgType . "Actual string value type"
+			self flag: #TODO.
+			1 halt.
+			"We actually need to call the api to get the current id of the sgType of the current entity"
+			sgType := 1. "This value mean nothing"
+			sgFamix typesgId: sgType. "Actual string value type"
 			sgFamix value: (Dictionary new
 					 at: 'source' put: source;
 					 yourself).
@@ -197,13 +219,13 @@ Vespucci >> postFamixSg: anEntityDict [
 					code := req response statusLine code.
 
 					code = 404 ifFalse: [
-						1 halt "Probably a server side error , should not appen" ].
+						Error signal: 'HTTP: ' , code asString , ' during api call'
+						"Probably a server side error , should not appen" ].
 					sgId := (colombusClient createSgFamix: sgFamix) at: 'id' ]. "here we need to create a new sg"
 
 			notebookElmt := ColombusModelNbElmt new
 				                notebookId: notebookId;
-				                "Passer la valeur en global"sousgraphfamix_id:
-					                sgId;
+				                sousgraphfamix_id: sgId;
 				                stepId: tagId;
 				                linestart: key;
 				                lineend: key;
@@ -234,7 +256,7 @@ Vespucci >> postImports [
 		"Now here we need to check if this SG exist"
 		sgFamix := ColombusModelSg new.
 		sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3').
-		sgFamix typesgId: sgTypeId. 
+		sgFamix typesgId: sgTypeId.
 		i removeKey: 'id' ifAbsent: [  ].
 		i removeKey: 'endPos' ifAbsent: [  ].
 		i removeKey: 'startPos' ifAbsent: [  ].
@@ -252,7 +274,8 @@ Vespucci >> postImports [
 				code := req response statusLine code.
 
 				code = 404 ifFalse: [
-					1 halt "Probably a server side error , should not appen" ].
+					Error signal: 'HTTP: ' , code asString , ' during api call'
+					"Probably a server side error , should not appen" ].
 				sgId := (colombusClient createSgFamix: sgFamix) at: 'id' ]. "here we need to create a new sg"
 
 		notebookElmt := ColombusModelNbElmt new
@@ -309,7 +332,8 @@ Vespucci >> postInvocations [
 				code := req response statusLine code.
 
 				code = 404 ifFalse: [
-					1 halt "Probably a server side error , should not appen" ].
+					Error signal: 'HTTP: ' , code asString , ' during api call'
+					"Probably a server side error , should not appen" ].
 				sgId := (colombusClient createSgFamix: sgFamix) at: 'id' ]. "here we need to create a new sg"
 
 		notebookElmt := ColombusModelNbElmt new
@@ -328,6 +352,8 @@ Vespucci >> postInvocations [
 Vespucci >> tagIdByName: aTagName [
 
 	| tagId |
+	self flag: #TODO.
+	"This method should be in ColombusClient"
 	tagId := colombusClient getStepByName: aTagName.
 	colombusClient client isSuccess ifFalse: [
 		| req code |
