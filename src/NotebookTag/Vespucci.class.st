@@ -215,7 +215,7 @@ Vespucci >> postFamixSg: anEntityDict [
 { #category : 'as yet unclassified' }
 Vespucci >> postImports [
 
-	| jsonImports modelImport tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID |
+	| jsonImports modelImport tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID sgTypeId |
 	jsonImports := self allImportInAJsonExportedModel: localfileReference.
 	modelImport := taggedModel allImports.
 	jsonImports do: [ :i |
@@ -233,7 +233,8 @@ Vespucci >> postImports [
 
 		"Now here we need to check if this SG exist"
 		sgFamix := ColombusModelSg new.
-		sgFamix typesgId: sgType. "We need to request the id where value is famix python import"
+		sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3').
+		sgFamix typesgId: sgTypeId. 
 		i removeKey: 'id' ifAbsent: [  ].
 		i removeKey: 'endPos' ifAbsent: [  ].
 		i removeKey: 'startPos' ifAbsent: [  ].
@@ -270,7 +271,7 @@ Vespucci >> postImports [
 { #category : 'as yet unclassified' }
 Vespucci >> postInvocations [
 
-	|  tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID jsonInvocation modelInvocations |
+	|  tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID jsonInvocation modelInvocations sgTypeId |
 	jsonInvocation := self allInvocationInAJsonExportedModel: localfileReference.
 	modelInvocations := taggedModel allInvocations.
 	jsonInvocation do: [ :i |
@@ -280,7 +281,7 @@ Vespucci >> postInvocations [
 			               = (i at: 'startPos') and: [
 				               invocationEntity sourceAnchor endPos asString
 				               = (i at: 'endPos') ] ].
-		1halt.
+
 		tag := famixInvocation first tags first name.
 		tagId := self tagIdByName: tag.
 		lineStart := famixInvocation first sourceAnchor startLine.
@@ -288,7 +289,8 @@ Vespucci >> postInvocations [
 
 		"Now here we need to check if this SG exist"
 		sgFamix := ColombusModelSg new.
-		sgFamix typesgId: sgType. "We need to request the id where value is famix python invocation"
+		sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3').
+		sgFamix typesgId: sgTypeId. 
 		i removeKey: 'id' ifAbsent: [  ].
 		i removeKey: 'endPos' ifAbsent: [  ].
 		i removeKey: 'startPos' ifAbsent: [  ].

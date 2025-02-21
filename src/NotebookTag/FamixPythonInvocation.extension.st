@@ -17,16 +17,39 @@ FamixPythonInvocation >> arguments: anArgumentcollection [
 { #category : '*NotebookTag' }
 FamixPythonInvocation >> computeArgs [
 
-	| text start end paramsAsString res |
-	
-	self flag: #todo. 
-	"If we have methods or func as arguments the parenthesis break this compute : model.compile(optimizer=optimizers.Adam(), loss=losses.sparse_categorical_crossentropy, metrics=[""accuracy""])"
+	| text start end paramsAsString level i char paramsList currentParam |
+	self flag: #todo.
+	"Thx to Pharo gpt but I will consider this as unstabble -> need to refacto"
 	text := self sourceAnchor sourceText.
+
 	start := text indexOf: $(.
-	end := text indexOf: $).
+
+	level := 1.
+	i := start + 1.
+	[ i <= text size and: [ level > 0 ] ] whileTrue: [
+		char := text at: i.
+		char = $( ifTrue: [ level := level + 1 ].
+		char = $) ifTrue: [ level := level - 1 ].
+		i := i + 1 ].
+	end := i - 1.
+
 	paramsAsString := text copyFrom: start + 1 to: end - 1.
-	res := paramsAsString splitOn: $,.
-	^ res collect: [ :each | each trim ]
+
+	paramsList := OrderedCollection new.
+	currentParam := ''.
+	level := 0.
+	1 to: paramsAsString size do: [ :i |
+		char := paramsAsString at: i.
+		char = $( ifTrue: [ level := level + 1 ].
+		char = $) ifTrue: [ level := level - 1 ].
+		(char = $, and: [ level = 0 ])
+			ifTrue: [
+				paramsList add: currentParam trim.
+				currentParam := '' ]
+			ifFalse: [ currentParam := currentParam , char asString ] ].
+
+	currentParam size > 0 ifTrue: [ paramsList add: currentParam trim ].
+	^ paramsList
 ]
 
 { #category : '*NotebookTag' }

@@ -129,6 +129,14 @@ ColombusClient >> getSgFamixsById: aSgFamixId [
 ]
 
 { #category : 'step' }
+ColombusClient >> getSgTypeByValue: aSgTypeValue [
+
+	| res |
+	res := client post: url,'find/typesg' contents: { #value->aSgTypeValue} asDictionary.
+	^res at: 'id'
+]
+
+{ #category : 'step' }
 ColombusClient >> getStepById: aStepId [ 
 
 	^ client get: url,'steps/',(aStepId asString ) 
