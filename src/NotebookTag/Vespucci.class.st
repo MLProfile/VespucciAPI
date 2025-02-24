@@ -91,18 +91,32 @@ Vespucci >> buildFamixModelWithAttributes [
 ]
 
 { #category : 'as yet unclassified' }
-Vespucci >> checkForInconsistancy: aNbElmtId [
+Vespucci >> checkForInconsistancy: aNbElmtId onTag: aTagId [
 	"When we create a new nbElmt we should check if others nbElmt exists with the same SG but a different step"
 
-	| inconsistencies |
+	| inconsistencies currentNb inconsistantNb inconsistency |
 	inconsistencies := colombusClient
 		                   findIconsistencyOnElmt: aNbElmtId
 		                   nbId: notebookId.
-	inconsistencies isNotEmpty ifTrue: [ 1 halt ]
+	self flag: 'check if inconsistencies size can be > 1'.
+	inconsistencies ifNotEmpty: [ "If we have inconsistencies we need to create them in db""Creation of an inconsistency with a name""Creation of two inconsistency element with previous inconsistency id and nbElmt id"
+		inconsistency := ColombusModelInconsistancyS new.
+		inconsistency description: 'Detected inconsistency during notebook import'.
 
-	"If we have inconsistencies we need to create them in db"
-	"Creation of an inconsistency with a name"
-	"Creation of two inconsistency element with previous inconsistency id and nbElmt id"
+
+		currentNb := {
+			             (#idnb -> notebookId).
+			             (#idelmt -> aNbElmtId).
+			             (#step_id -> aTagId) }.
+		inconsistency elements: currentNb asDictionary.
+		inconsistencies do: [ :i |
+			inconsistency elements: {
+					(#idnb -> (i at: 'idnb')).
+					(#idelmt -> (i at: 'idelmt')).
+					(#step_id -> (i at: 'laststep_id')) } asDictionary ].
+
+		colombusClient createIconsistencyS: inconsistency.
+		self inform: 'Inconsistency detected' ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -200,7 +214,7 @@ Vespucci >> postFamixSg: anEntityDict [
 				                lineend: key;
 				                yourself.
 			elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
-			self checkForInconsistancy: elmtID ] ]
+			self checkForInconsistancy: elmtID onTag: tagId ] ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -255,7 +269,7 @@ Vespucci >> postImports [
 			                lineend: lineEnd;
 			                yourself.
 		elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
-		self checkForInconsistancy: elmtID ].
+		self checkForInconsistancy: elmtID onTag: tagId].
 
 	^ jsonImports
 ]
@@ -313,7 +327,7 @@ Vespucci >> postInvocations [
 			                lineend: lineEnd;
 			                yourself.
 		elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
-		self checkForInconsistancy: elmtID ].
+		self checkForInconsistancy: elmtID onTag: tagId. ].
 
 ]
 

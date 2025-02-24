@@ -38,6 +38,13 @@ ColombusClient >> client [
 	^ client
 ]
 
+{ #category : 'inconsistency' }
+ColombusClient >> createIconsistencyS: aColombusModelInconsistencS [
+
+	^ client post: url,'inconsistencies/simple' contents: aColombusModelInconsistencS asDictionary. 
+	
+]
+
 { #category : 'nbElmt' }
 ColombusClient >> createNbElmt: aColombusModelNbElmt [
 "
