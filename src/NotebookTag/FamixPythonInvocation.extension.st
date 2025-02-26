@@ -53,6 +53,27 @@ FamixPythonInvocation >> computeArgs [
 ]
 
 { #category : '*NotebookTag' }
+FamixPythonInvocation >> computePackage [
+
+	| module toPrint current parent |
+	self flag: #TODO.
+	"Dans le cas ou l'on a plusieurs candidates cela ne fonctionne pas"
+	module := self candidates first.
+	toPrint := OrderedCollection new.
+
+	current := module.
+	[ 
+		(current respondsTo: #parentPackage) 
+			and: [ (parent := current parentPackage) isNotNil ] 
+	] whileTrue: [ 
+		toPrint add: parent.
+		current := parent 
+	].
+
+	^ $. join: (toPrint reverse collect: #name)
+]
+
+{ #category : '*NotebookTag' }
 FamixPythonInvocation >> endPos [ 
 
     <FMProperty: #endPos type: #String>

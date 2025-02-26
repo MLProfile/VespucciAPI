@@ -86,6 +86,7 @@ Vespucci >> buildFamixModelWithAttributes [
 	model allInvocations do: [ :i |
 		i function: i candidates first name.
 		i arguments: i computeArgs asStringWithCr.
+		i library: (i computePackage asString).
 		i startPos: i sourceAnchor startPos asString.
 		i endPos: i sourceAnchor endPos asString ]
 ]
