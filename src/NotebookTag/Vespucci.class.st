@@ -30,6 +30,48 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
+Vespucci class >> exportToJSon: aFamixPythonTaggedModel [
+	"Here we want a famix python model tagged with TagsJSonReader
+pythonModelA := FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/student_a' asFileReference.
+
+taggedModelA := TagsJsonReader new model: pythonModelA; yourself .
+taggedModelA readFrom: '/Users/mignard/Documents/work/mooseDemo/student_a/profile_labels_export_tp_student_A.json' asFileReference.
+modelA := taggedModelA model.
+"
+
+	^ String streamContents: [ :stream |
+		  self new
+			  notebookId: 'notebookIdDemo';
+			  taggedModel: aFamixPythonTaggedModel;
+			  buildFamixModelWithAttributes;
+			  exportToJSON;
+			  exportImportsTo: stream;
+			  exportInvocationsTo: stream;
+			  yourself ]
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci class >> exportToJSon: aFileReference fromTaggedModel: aFamixPythonTaggedModel [
+	"Here we want a famix python model tagged with TagsJSonReader
+pythonModelA := FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/student_a' asFileReference.
+
+taggedModelA := TagsJsonReader new model: pythonModelA; yourself .
+taggedModelA readFrom: '/Users/mignard/Documents/work/mooseDemo/student_a/profile_labels_export_tp_student_A.json' asFileReference.
+modelA := taggedModelA model.
+"
+
+	^ String streamContents: [ :stream |
+		  self new
+			  notebookId: 'notebookIdDemo';
+			  taggedModel: aFamixPythonTaggedModel;
+			  buildFamixModelWithAttributes;
+			  exportToJSON;
+			  exportImportsTo: stream;
+			  exportInvocationsTo: stream;
+			  yourself ]
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci class >> uploadAndComputeNotebookWithId: aNotebookId fromTaggedModel: aFamixPythonTaggedModel [
 	"Here we want a famix python model tagged with TagsJSonReader
 pythonModelA := FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/student_a' asFileReference.
@@ -118,6 +160,94 @@ Vespucci >> checkForInconsistancy: aNbElmtId onTag: aTagId [
 
 		colombusClient createIconsistencyS: inconsistency.
 		self inform: 'Inconsistency detected' ]
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> exportImportsTo: aStream [
+
+	| jsonImports modelImport tag tagId lineStart lineEnd sgTypeId lineSource toExport jsonString first |
+	jsonImports := self allImportInAJsonExportedModel: localfileReference.
+	modelImport := taggedModel allImports.
+	
+	aStream nextPutAll: '['.
+	first := true.	
+	jsonImports do: [ :i |
+		| famixImport |
+		famixImport := modelImport select: [ :importEntity |
+			               importEntity sourceAnchor startPos asString
+			               = (i at: 'startPos') and: [
+				               importEntity sourceAnchor endPos asString
+				               = (i at: 'endPos') ] ].
+		"We can have multiple entities in the same sourceAnchors pos but the tag will be the same so I just lookup for the firstone"
+		tag := famixImport first tags first name.
+		tagId := colombusClient getStepIdByName: tag.
+		lineStart := famixImport first sourceAnchor startLine.
+		lineEnd := famixImport first sourceAnchor endLine.
+		lineSource := famixImport first sourceAnchor sourceText.
+
+		"sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3')."
+		sgTypeId := 'todo'.
+		toExport := ApiModelNbElmntAndSg new.
+		toExport type_sg_id: sgTypeId.
+		toExport notebook_id: notebookId.
+		toExport step_impl_id: tagId.
+		toExport value: i.
+		toExport source: lineSource.
+		toExport line_start: lineStart.
+		toExport line_end: lineEnd.
+		toExport library: (i at: 'package').
+		toExport function: (i at: 'importOf').
+
+		jsonString := NeoJSONWriter toString: toExport asDictionary.
+		first ifFalse: [ aStream nextPut: $, ].
+		aStream nextPutAll: jsonString.
+		first := false.
+		 ].
+
+	^ jsonImports
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> exportInvocationsTo: aStream [
+
+	| tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID jsonInvocation modelInvocations sgTypeId lineSource toExport jsonString first |
+	jsonInvocation := self allInvocationInAJsonExportedModel:
+		                  localfileReference.
+	modelInvocations := taggedModel allInvocations.
+
+	jsonInvocation do: [ :i |
+		| famixInvocation |
+		famixInvocation := modelInvocations select: [ :invocationEntity |
+			                   invocationEntity sourceAnchor startPos asString
+			                   = (i at: 'startPos') and: [
+				                   invocationEntity sourceAnchor endPos asString
+				                   = (i at: 'endPos') ] ].
+
+		tag := famixInvocation first tags first name.
+		tagId := colombusClient getStepIdByName: tag.
+		lineStart := famixInvocation first sourceAnchor startLine.
+		lineEnd := famixInvocation first sourceAnchor endLine.
+		lineSource := famixInvocation first sourceAnchor sourceText.
+
+		"sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3')."
+		sgTypeId := 'todo'.
+		toExport := ApiModelNbElmntAndSg new.
+		toExport type_sg_id: sgTypeId.
+		toExport notebook_id: notebookId.
+		toExport step_impl_id: tagId.
+		toExport value: i.
+		toExport source: lineSource.
+		toExport line_start: lineStart.
+		toExport line_end: lineEnd.
+		toExport library: (i at: 'library').
+		toExport function: (i at: 'function').
+
+		jsonString := NeoJSONWriter toString: toExport asDictionary.
+		aStream nextPut: $,.
+		aStream nextPutAll: jsonString ].
+
+	aStream nextPutAll: ']'.
+	^ aStream
 ]
 
 { #category : 'as yet unclassified' }
@@ -221,7 +351,7 @@ Vespucci >> postFamixSg: anEntityDict [
 { #category : 'as yet unclassified' }
 Vespucci >> postImports [
 
-	| jsonImports modelImport tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID sgTypeId |
+	| jsonImports modelImport tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID sgTypeId lineSource |
 	jsonImports := self allImportInAJsonExportedModel: localfileReference.
 	modelImport := taggedModel allImports.
 	jsonImports do: [ :i |
@@ -236,6 +366,8 @@ Vespucci >> postImports [
 		tagId := colombusClient getStepIdByName: tag.
 		lineStart := famixImport first sourceAnchor startLine.
 		lineEnd := famixImport first sourceAnchor endLine.
+		lineSource := famixImport first sourceAnchor sourceText. 
+	
 
 		"Now here we need to check if this SG exist"
 		sgFamix := ColombusModelSg new.
@@ -247,6 +379,7 @@ Vespucci >> postImports [
 		i removeKey: 'importedEntity' ifAbsent: [  ].
 		i removeKey: 'importingEntity' ifAbsent: [  ].
 		i removeKey: 'allTagAssociations' ifAbsent: [  ].
+		i at: 'source' put: lineSource.
 		sgFamix value: i.
 
 		value := colombusClient findSgFamix: sgFamix.
@@ -278,7 +411,7 @@ Vespucci >> postImports [
 { #category : 'as yet unclassified' }
 Vespucci >> postInvocations [
 
-	|  tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID jsonInvocation modelInvocations sgTypeId |
+	|  tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID jsonInvocation modelInvocations sgTypeId lineSource |
 	jsonInvocation := self allInvocationInAJsonExportedModel: localfileReference.
 	modelInvocations := taggedModel allInvocations.
 	jsonInvocation do: [ :i |
@@ -293,6 +426,7 @@ Vespucci >> postInvocations [
 		tagId := colombusClient getStepIdByName: tag.
 		lineStart := famixInvocation first sourceAnchor startLine.
 		lineEnd := famixInvocation first sourceAnchor endLine.
+		lineSource := famixInvocation first sourceAnchor sourceText. 
 
 		"Now here we need to check if this SG exist"
 		sgFamix := ColombusModelSg new.
@@ -305,6 +439,7 @@ Vespucci >> postInvocations [
 		i removeKey: 'candidates' ifAbsent: [  ].
 		i removeKey: 'signature' ifAbsent: [  ].
 		i removeKey: 'allTagAssociations' ifAbsent: [  ].
+		i at: 'source' put: lineSource.
 		sgFamix value: i.
 
 		value := colombusClient findSgFamix: sgFamix.
