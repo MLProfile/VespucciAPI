@@ -31,17 +31,11 @@ Class {
 
 { #category : 'as yet unclassified' }
 Vespucci class >> exportToJSon: aFamixPythonTaggedModel [
-	"Here we want a famix python model tagged with TagsJSonReader
-pythonModelA := FamixPythonImporter import: '/Users/mignard/Documents/work/mooseDemo/student_a' asFileReference.
-
-taggedModelA := TagsJsonReader new model: pythonModelA; yourself .
-taggedModelA readFrom: '/Users/mignard/Documents/work/mooseDemo/student_a/profile_labels_export_tp_student_A.json' asFileReference.
-modelA := taggedModelA model.
-"
+	"Here we want a famix python model"
 
 	^ String streamContents: [ :stream |
 		  self new
-			  notebookId: 'notebookIdDemo';
+			  notebookId: '2b5ab95a-5c9c-4c44-9ffc-dcc5b74dc714';
 			  taggedModel: aFamixPythonTaggedModel;
 			  buildFamixModelWithAttributes;
 			  exportToJSON;
@@ -187,7 +181,7 @@ Vespucci >> exportImportsTo: aStream [
 		startPos := famixImport first sourceAnchor startPos asString.
 		endPos := famixImport first sourceAnchor endPos asString.
 
-		sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3').
+		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
 		toExport := ApiModelNbElmntAndSg new.
 		toExport type_sg_id: sgTypeId.
 		toExport notebook_id: notebookId.
@@ -236,8 +230,7 @@ Vespucci >> exportInvocationsTo: aStream [
 
 		"ToDo handle invocation composition"
 
-		"sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3')."
-		sgTypeId := 'todo'.
+		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
 		toExport := ApiModelNbElmntAndSg new.
 		toExport type_sg_id: sgTypeId.
 		toExport notebook_id: notebookId.
