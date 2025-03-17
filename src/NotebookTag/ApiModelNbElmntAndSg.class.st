@@ -2,7 +2,6 @@ Class {
 	#name : 'ApiModelNbElmntAndSg',
 	#superclass : 'Object',
 	#instVars : [
-		'step_impl_id',
 		'notebook_id',
 		'type_sg_id',
 		'line_start',
@@ -10,7 +9,10 @@ Class {
 		'library',
 		'function',
 		'source',
-		'value'
+		'value',
+		'step_name',
+		'pos_start',
+		'pos_end'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -20,11 +22,13 @@ Class {
 ApiModelNbElmntAndSg >> asDictionary [
 
 	^ Dictionary new
-		  at: 'step_impl_id' put: step_impl_id;
+		  at: 'step_name' put: step_name;
 		  at: 'notebook_id' put: notebook_id;
 		  at: 'type_sg_id' put: type_sg_id;
 		  at: 'line_start' put: line_start;
 		  at: 'line_end' put: line_end;
+		  at: 'pos_start' put: pos_start;
+		  at: 'pos_end' put: pos_end;
 		  at: 'library' put: library;
 		  at: 'function' put: function;
 		  at: 'source' put: source;
@@ -47,8 +51,7 @@ ApiModelNbElmntAndSg >> function: anObject [
 { #category : 'initialization' }
 ApiModelNbElmntAndSg >> initialize [
 
-	| pos_start pos_end |
-	step_impl_id := nil.
+	step_name := nil.
 	notebook_id := nil.
 	type_sg_id := nil.
 	line_start := nil.
@@ -110,6 +113,30 @@ ApiModelNbElmntAndSg >> notebook_id: anObject [
 ]
 
 { #category : 'accessing' }
+ApiModelNbElmntAndSg >> pos_end [
+
+	^ pos_end
+]
+
+{ #category : 'accessing' }
+ApiModelNbElmntAndSg >> pos_end: anObject [
+
+	pos_end := anObject
+]
+
+{ #category : 'accessing' }
+ApiModelNbElmntAndSg >> pos_start [
+
+	^ pos_start
+]
+
+{ #category : 'accessing' }
+ApiModelNbElmntAndSg >> pos_start: anObject [
+
+	pos_start := anObject
+]
+
+{ #category : 'accessing' }
 ApiModelNbElmntAndSg >> source [
 
 	^ source
@@ -122,15 +149,15 @@ ApiModelNbElmntAndSg >> source: anObject [
 ]
 
 { #category : 'accessing' }
-ApiModelNbElmntAndSg >> step_impl_id [
+ApiModelNbElmntAndSg >> step_name [
 
-	^ step_impl_id
+	^ step_name
 ]
 
 { #category : 'accessing' }
-ApiModelNbElmntAndSg >> step_impl_id: anObject [
+ApiModelNbElmntAndSg >> step_name: anObject [
 
-	step_impl_id := anObject
+	step_name := anObject
 ]
 
 { #category : 'accessing' }

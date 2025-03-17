@@ -165,7 +165,7 @@ Vespucci >> checkForInconsistancy: aNbElmtId onTag: aTagId [
 { #category : 'as yet unclassified' }
 Vespucci >> exportImportsTo: aStream [
 
-	| jsonImports modelImport tag tagId lineStart lineEnd sgTypeId lineSource toExport jsonString first |
+	| jsonImports modelImport tag tagId lineStart lineEnd sgTypeId lineSource toExport jsonString first startPos endPos |
 	jsonImports := self allImportInAJsonExportedModel: localfileReference.
 	modelImport := taggedModel allImports.
 	
@@ -179,22 +179,26 @@ Vespucci >> exportImportsTo: aStream [
 				               importEntity sourceAnchor endPos asString
 				               = (i at: 'endPos') ] ].
 		"We can have multiple entities in the same sourceAnchors pos but the tag will be the same so I just lookup for the firstone"
-		tag := famixImport first tags first name.
-		tagId := colombusClient getStepIdByName: tag.
+		"tag := famixImport first tags first name."
+		"tagId := colombusClient getStepIdByName: tag."
 		lineStart := famixImport first sourceAnchor startLine.
 		lineEnd := famixImport first sourceAnchor endLine.
 		lineSource := famixImport first sourceAnchor sourceText.
+		startPos := famixImport first sourceAnchor startPos asString.
+		endPos := famixImport first sourceAnchor endPos asString.
 
 		"sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3')."
 		sgTypeId := 'todo'.
 		toExport := ApiModelNbElmntAndSg new.
 		toExport type_sg_id: sgTypeId.
 		toExport notebook_id: notebookId.
-		toExport step_impl_id: tagId.
+		toExport step_name: 'import'.
 		toExport value: i.
 		toExport source: lineSource.
 		toExport line_start: lineStart.
 		toExport line_end: lineEnd.
+		toExport pos_start: startPos.
+		toExport pos_end: endPos.
 		toExport library: (i at: 'package').
 		toExport function: (i at: 'importOf').
 
@@ -210,7 +214,7 @@ Vespucci >> exportImportsTo: aStream [
 { #category : 'as yet unclassified' }
 Vespucci >> exportInvocationsTo: aStream [
 
-	| tag tagId lineStart lineEnd sgFamix value sgId notebookElmt elmtID jsonInvocation modelInvocations sgTypeId lineSource toExport jsonString first |
+	| tag tagId lineStart  jsonInvocation modelInvocations sgTypeId lineSource toExport jsonString startPos endPos lineEnd |
 	jsonInvocation := self allInvocationInAJsonExportedModel:
 		                  localfileReference.
 	modelInvocations := taggedModel allInvocations.
@@ -223,22 +227,26 @@ Vespucci >> exportInvocationsTo: aStream [
 				                   invocationEntity sourceAnchor endPos asString
 				                   = (i at: 'endPos') ] ].
 
-		tag := famixInvocation first tags first name.
-		tagId := colombusClient getStepIdByName: tag.
+		"tag := famixInvocation first tags first name."
+		"tagId := colombusClient getStepIdByName: tag."
 		lineStart := famixInvocation first sourceAnchor startLine.
 		lineEnd := famixInvocation first sourceAnchor endLine.
 		lineSource := famixInvocation first sourceAnchor sourceText.
+		startPos := famixInvocation first sourceAnchor startPos asString.
+		endPos := famixInvocation first sourceAnchor endPos asString.
 
 		"sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3')."
 		sgTypeId := 'todo'.
 		toExport := ApiModelNbElmntAndSg new.
 		toExport type_sg_id: sgTypeId.
 		toExport notebook_id: notebookId.
-		toExport step_impl_id: tagId.
+		toExport step_name: 'other'.
 		toExport value: i.
 		toExport source: lineSource.
 		toExport line_start: lineStart.
 		toExport line_end: lineEnd.
+		toExport pos_start: startPos .
+		toExport pos_end: endPos.
 		toExport library: (i at: 'library').
 		toExport function: (i at: 'function').
 
