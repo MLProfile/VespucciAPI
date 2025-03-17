@@ -32,6 +32,28 @@ ColombusClient >> apiUrl: anApiUrl [
 
 ]
 
+{ #category : 'as yet unclassified' }
+ColombusClient >> checkHttpCode: aCode [
+
+    aCode = 200 ifTrue: [ 
+        ^ self inform: 'OK' 
+    ].
+    aCode = 401 ifTrue: [ 
+        ^ Error signal: 'Unauthorized' 
+    ].
+    aCode = 404 ifTrue: [ 
+        ^ Error signal: 'Not found' 
+    ].
+    (aCode between: 400 and: 499) ifTrue: [
+        ^ Error signal: 'HTTP:' , aCode asString , ' - Client error'
+    ].
+    (aCode between: 500 and: 599) ifTrue: [
+        ^ Error signal: 'HTTP:' , aCode asString , ' - Server error'
+    ].
+ 
+    ^ Error signal: 'HTTP:' , aCode asString , ' - Erreur inconnue'
+]
+
 { #category : 'accessing' }
 ColombusClient >> client [
 
@@ -40,7 +62,9 @@ ColombusClient >> client [
 
 { #category : 'inconsistency' }
 ColombusClient >> createIconsistencyS: aColombusModelInconsistencS [
-
+		
+		self flag: #toDelete.
+		
 	^ client post: url,'inconsistencies/simple' contents: aColombusModelInconsistencS asDictionary. 
 	
 ]
@@ -57,6 +81,8 @@ notebookRequest lineend: 5.
 
 self createNbElmt: notebookRequest
 "
+
+self flag: #toDelete.
 	^ client post: url,'notebook_elements/' contents: aColombusModelNbElmt asDictionary. 
 ]
 
@@ -76,6 +102,8 @@ notebookRequest lineend: 5.
 
 self createNbElmt: notebookRequest
 "
+
+self flag: #toDelete.
 	^ client post: url,'notebook_elements/simple/' contents: aColombusModelNbElmtS asDictionary. 
 ]
 
@@ -87,12 +115,13 @@ sgFamix value: (Dictionary new at: 'row' put: 'from datetime import date'; yours
 
 self createSgFamix: sgFamix."
 
+self flag: #toDelete.
 	^ client post: url,'sousgraphfamix/' contents: aSgFamixObj asDictionary. 
 ]
 
 { #category : 'inconsistency' }
 ColombusClient >> findIconsistency: anElmtMissMatchModel [
-
+self flag: #toDelete.
 	^ client post: url,'inconsistencies/find' contents: anElmtMissMatchModel asDictionary. 
 	
 ]
@@ -101,6 +130,8 @@ ColombusClient >> findIconsistency: anElmtMissMatchModel [
 ColombusClient >> findIconsistencyOnElmt: anElmtId nbId: aNbId [
 
 	| res inconsistencies |
+	
+	self flag: #toDelete.
 	res := client post: url , 'inconsistencies/find' contents: {
 			       (#idnb -> aNbId).
 			       (#idelmt -> anElmtId) } asDictionary.
@@ -123,44 +154,52 @@ ColombusClient >> findIconsistencyOnElmt: anElmtId nbId: aNbId [
 ColombusClient >> findSgFamix: aSgFamixModelObj [
 "If sg is find return the id"
 
+self flag: #toDelete.
 	^ client post: url,'sousgraphfamix/search' contents: aSgFamixModelObj asDictionary. 
 ]
 
 { #category : 'nbElmt' }
 ColombusClient >> getNbElmts [
-
+self flag: #toDelete.
 	^ client get: url,'notebook_elements/'  
 ]
 
 { #category : 'nbElmt' }
 ColombusClient >> getNbId: aNbId elementId: anElmtId [
-
+self flag: #toDelete.
 	^ client get: url,'notebook_elements/',(aNbId asString),'/',(anElmtId asString)  
 ]
 
 { #category : 'sousGraph' }
 ColombusClient >> getSgFamixs [
-
+self flag: #toDelete.
 	^ client get: url,'sousgraphfamix/'
 ]
 
 { #category : 'sousGraph' }
 ColombusClient >> getSgFamixsById: aSgFamixId [
-
+self flag: #toDelete.
 	^ client get: url,'sousgraphfamix/',(aSgFamixId asString)
 ]
 
 { #category : 'step' }
-ColombusClient >> getSgTypeByValue: aSgTypeValue [
+ColombusClient >> getSgTypeIdByValue: aSgTypeValue [
 
 	| res |
-	res := client post: url,'find/typesg' contents: { #value->aSgTypeValue} asDictionary.
-	^res at: 'id'
+	res := client get: url,'vespucci/api/typesgs/value/', aSgTypeValue asString.
+
+	self client isSuccess ifFalse: [
+		| req code |
+		req := self client.
+		code := req response statusLine code.
+		self checkHttpCode: code ].
+
+	^ res at: 'id'
 ]
 
 { #category : 'step' }
 ColombusClient >> getStepById: aStepId [ 
-
+self flag: #toDelete.
 	^ client get: url,'steps/',(aStepId asString ) 
 ]
 
@@ -168,6 +207,7 @@ ColombusClient >> getStepById: aStepId [
 ColombusClient >> getStepIdByName: aStepName [
 
 	| res |
+	self flag: #toDelete.
 	res := client
 		       post: url , 'step/'
 		       contents: { (#name -> aStepName) } asDictionary.
@@ -183,27 +223,41 @@ ColombusClient >> getStepIdByName: aStepName [
 	^ res at: 'id'
 ]
 
-{ #category : 'step' }
-ColombusClient >> getSteps [ 
-
-	^ client get: url,'steps/' 
-]
-
 { #category : 'sousGraph' }
 ColombusClient >> getTypesSg [
 
-	^ client get: url,'typesg/'
+	| res |
+	client headerAt: 'X-API-Token' add: 'profil-platform-token'.
+	res := client get: url , 'vespucci/api/typesgs' .
+
+	self client isSuccess ifFalse: [
+		| req code |
+		req := self client.
+		code := req response statusLine code.
+		self checkHttpCode: code ].
+
+	^ res
 ]
 
 { #category : 'sousGraph' }
 ColombusClient >> getTypesSgById: atypeSgId [
 
-	^ client get: url,'typesg/',(atypeSgId asString)
+	| res |
+	res := client get: url , 'vespucci/api/typesgs/' , atypeSgId asString.
+
+	self client isSuccess ifFalse: [
+		| req code |
+		req := self client.
+		code := req response statusLine code.
+		self checkHttpCode: code ].
+
+	^ res
 ]
 
 { #category : 'as yet unclassified' }
 ColombusClient >> initialize [ 
 
 	client :=  ZnClient new forJsonREST; yourself.
+	client headerAt: 'X-API-Token' add: 'profil-platform-token'.
 
 ]

@@ -187,8 +187,7 @@ Vespucci >> exportImportsTo: aStream [
 		startPos := famixImport first sourceAnchor startPos asString.
 		endPos := famixImport first sourceAnchor endPos asString.
 
-		"sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3')."
-		sgTypeId := 'todo'.
+		sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3').
 		toExport := ApiModelNbElmntAndSg new.
 		toExport type_sg_id: sgTypeId.
 		toExport notebook_id: notebookId.
@@ -234,6 +233,8 @@ Vespucci >> exportInvocationsTo: aStream [
 		lineSource := famixInvocation first sourceAnchor sourceText.
 		startPos := famixInvocation first sourceAnchor startPos asString.
 		endPos := famixInvocation first sourceAnchor endPos asString.
+
+		"ToDo handle invocation composition"
 
 		"sgTypeId := colombusClient getSgTypeByValue: (i at: 'FM3')."
 		sgTypeId := 'todo'.
@@ -290,7 +291,7 @@ Vespucci >> famixElementsByLine: aTaggedFamixPythonModel [
 { #category : 'initialization' }
 Vespucci >> initialize [ 
 
-	colombusClient := ColombusClient createClientWithUrl: 'http://127.0.0.1:8000/'.
+	colombusClient := ColombusClient createClientWithUrl: 'http://127.0.0.1:8080/'.
 	localfileReference := FileReference
 		                      newTempFilePrefix: 'pythonModel-'
 		                      suffix: '-export.json'.

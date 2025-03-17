@@ -12,7 +12,8 @@ Class {
 		'value',
 		'step_name',
 		'pos_start',
-		'pos_end'
+		'pos_end',
+		'is_composition'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -61,7 +62,20 @@ ApiModelNbElmntAndSg >> initialize [
 	library := nil.
 	function := nil.
 	source := nil.
-	value := nil
+	value := nil.
+	is_composition := false.
+]
+
+{ #category : 'accessing' }
+ApiModelNbElmntAndSg >> is_composition [
+
+	^ is_composition
+]
+
+{ #category : 'accessing' }
+ApiModelNbElmntAndSg >> is_composition: anObject [
+
+	is_composition := anObject
 ]
 
 { #category : 'accessing' }
