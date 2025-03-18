@@ -23,11 +23,28 @@ Class {
 		'notebookId',
 		'sgType',
 		'localfileReference',
-		'taggedModel'
+		'taggedModel',
+		'notebookName'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
 }
+
+{ #category : 'as yet unclassified' }
+Vespucci class >> exportANotebookNamed: aString toJSonFromModel: aFamixPythonTaggedModel [
+	"Here we want a famix python model"
+
+	^ String streamContents: [ :stream |
+		  self new
+			  notebookId: '2b5ab95a-5c9c-4c44-9ffc-dcc5b74dc714';
+			  notebookName: aString;
+			  taggedModel: aFamixPythonTaggedModel;
+			  buildFamixModelWithAttributes;
+			  exportToJSON;
+			  exportImportsTo: stream;
+			  exportInvocationsTo: stream;
+			  yourself ]
+]
 
 { #category : 'as yet unclassified' }
 Vespucci class >> exportToJSon: aFamixPythonTaggedModel [
@@ -110,8 +127,14 @@ Vespucci >> buildFamixModelWithAttributes [
 	model := taggedModel. "Surtout pas de copie ici pour le coup"
 
 	model allImports do: [ :i |
-		i importOf: i importedEntity name.
-		i package: (i importedEntity libraryName).
+		i importedEntity
+			ifNotNil: [
+				i importOf: i importedEntity name.
+				i package: i importedEntity libraryName ]
+			ifNil: [
+				i importOf: 'parse_error'.
+				i package: 'parse_error' ].
+
 		i startPos: i sourceAnchor startPos asString.
 		i endPos: i sourceAnchor endPos asString ].
 
@@ -122,7 +145,7 @@ Vespucci >> buildFamixModelWithAttributes [
 	model allInvocations do: [ :i |
 		i function: i candidates first name.
 		i arguments: i computeArgs asStringWithCr.
-		i library: (i computePackage asString).
+		i library: i computePackage asString.
 		i startPos: i sourceAnchor startPos asString.
 		i endPos: i sourceAnchor endPos asString ]
 ]
@@ -159,12 +182,12 @@ Vespucci >> checkForInconsistancy: aNbElmtId onTag: aTagId [
 { #category : 'as yet unclassified' }
 Vespucci >> exportImportsTo: aStream [
 
-	| jsonImports modelImport tag tagId lineStart lineEnd sgTypeId lineSource toExport jsonString first startPos endPos |
+	| jsonImports modelImport tag tagId lineStart lineEnd sgTypeId lineSource toExport jsonString first startPos endPos importingEntity isExportable |
 	jsonImports := self allImportInAJsonExportedModel: localfileReference.
 	modelImport := taggedModel allImports.
-	
+
 	aStream nextPutAll: '['.
-	first := true.	
+	first := true.
 	jsonImports do: [ :i |
 		| famixImport |
 		famixImport := modelImport select: [ :importEntity |
@@ -181,6 +204,10 @@ Vespucci >> exportImportsTo: aStream [
 		startPos := famixImport first sourceAnchor startPos asString.
 		endPos := famixImport first sourceAnchor endPos asString.
 
+		"In the case we analyse simultanously multiple source, we want to keep only the imports from the notebook"
+		importingEntity := famixImport first importingEntity name.
+		isExportable := notebookName = importingEntity.
+
 		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
 		toExport := ApiModelNbElmntAndSg new.
 		toExport type_sg_id: sgTypeId.
@@ -195,11 +222,11 @@ Vespucci >> exportImportsTo: aStream [
 		toExport library: (i at: 'package').
 		toExport function: (i at: 'importOf').
 
-		jsonString := NeoJSONWriter toString: toExport asDictionary.
-		first ifFalse: [ aStream nextPut: $, ].
-		aStream nextPutAll: jsonString.
-		first := false.
-		 ].
+		isExportable ifTrue: [
+			jsonString := NeoJSONWriter toString: toExport asDictionary.
+			first ifFalse: [ aStream nextPut: $, ].
+			aStream nextPutAll: jsonString.
+			first := false ] ].
 
 	^ jsonImports
 ]
@@ -207,7 +234,7 @@ Vespucci >> exportImportsTo: aStream [
 { #category : 'as yet unclassified' }
 Vespucci >> exportInvocationsTo: aStream [
 
-	| tag tagId lineStart  jsonInvocation modelInvocations sgTypeId lineSource toExport jsonString startPos endPos lineEnd |
+	| tag tagId lineStart jsonInvocation modelInvocations sgTypeId lineSource toExport jsonString startPos endPos lineEnd funcSource isExportable sender |
 	jsonInvocation := self allInvocationInAJsonExportedModel:
 		                  localfileReference.
 	modelInvocations := taggedModel allInvocations.
@@ -224,9 +251,16 @@ Vespucci >> exportInvocationsTo: aStream [
 		"tagId := colombusClient getStepIdByName: tag."
 		lineStart := famixInvocation first sourceAnchor startLine.
 		lineEnd := famixInvocation first sourceAnchor endLine.
+		funcSource := nil.
+		famixInvocation first candidates first isStub ifFalse: [
+			funcSource := famixInvocation first candidates first sourceText ].
 		lineSource := famixInvocation first sourceAnchor sourceText.
 		startPos := famixInvocation first sourceAnchor startPos asString.
 		endPos := famixInvocation first sourceAnchor endPos asString.
+
+		"In the case we analyse simultanously multiple source, we want to keep only the invocations from the notebook"
+		sender := famixInvocation first sender name.
+		isExportable := notebookName = sender.
 
 		"ToDo handle invocation composition"
 
@@ -236,17 +270,21 @@ Vespucci >> exportInvocationsTo: aStream [
 		toExport notebook_id: notebookId.
 		toExport step_name: 'other'.
 		toExport value: i.
-		toExport source: lineSource.
+		funcSource
+			ifNotNil: [ toExport source: funcSource , '\n ' , lineSource ]
+			ifNil: [ toExport source: lineSource ].
+		"	toExport source: lineSource."
 		toExport line_start: lineStart.
 		toExport line_end: lineEnd.
-		toExport pos_start: startPos .
+		toExport pos_start: startPos.
 		toExport pos_end: endPos.
 		toExport library: (i at: 'library').
 		toExport function: (i at: 'function').
 
-		jsonString := NeoJSONWriter toString: toExport asDictionary.
-		aStream nextPut: $,.
-		aStream nextPutAll: jsonString ].
+		isExportable ifTrue: [
+			jsonString := NeoJSONWriter toString: toExport asDictionary.
+			aStream nextPut: $,.
+			aStream nextPutAll: jsonString ] ].
 
 	aStream nextPutAll: ']'.
 	^ aStream
@@ -300,6 +338,18 @@ Vespucci >> notebookId [
 Vespucci >> notebookId: anObject [
 
 	notebookId := anObject
+]
+
+{ #category : 'accessing' }
+Vespucci >> notebookName [
+
+	^ notebookName
+]
+
+{ #category : 'accessing' }
+Vespucci >> notebookName: astring [
+
+	notebookName := astring
 ]
 
 { #category : 'as yet unclassified' }
