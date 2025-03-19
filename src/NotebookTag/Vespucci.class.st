@@ -24,7 +24,8 @@ Class {
 		'sgType',
 		'localfileReference',
 		'taggedModel',
-		'notebookName'
+		'notebookName',
+		'projectId'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -53,6 +54,7 @@ Vespucci class >> exportToJSon: aFamixPythonTaggedModel [
 	^ String streamContents: [ :stream |
 		  self new
 			  notebookId: '2b5ab95a-5c9c-4c44-9ffc-dcc5b74dc714';
+			"Will not work anymore before checking if notebook name is empty or not"
 			  taggedModel: aFamixPythonTaggedModel;
 			  buildFamixModelWithAttributes;
 			  exportToJSON;
@@ -76,6 +78,23 @@ modelA := taggedModelA model.
 			  notebookId: 'notebookIdDemo';
 			  taggedModel: aFamixPythonTaggedModel;
 			  buildFamixModelWithAttributes;
+			  exportToJSON;
+			  exportImportsTo: stream;
+			  exportInvocationsTo: stream;
+			  yourself ]
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci class >> fromApiComputeNotebookId: aNotebookId fromProject: aProjectId [
+	"Auto build the famix model from sources downloaded on the api"
+
+	^ String streamContents: [ :stream |
+		  self new
+			  notebookId: aNotebookId;
+			  projectId: aProjectId;
+			  downloadAndBuildFamixModel;
+			  buildFamixModelWithAttributes;
+			"Now we want to upload this json to the colombus api"
 			  exportToJSON;
 			  exportImportsTo: stream;
 			  exportInvocationsTo: stream;
@@ -132,6 +151,7 @@ Vespucci >> buildFamixModelWithAttributes [
 				i importOf: i importedEntity name.
 				i package: i importedEntity libraryName ]
 			ifNil: [
+				1halt.
 				i importOf: 'parse_error'.
 				i package: 'parse_error' ].
 
@@ -179,6 +199,15 @@ Vespucci >> checkForInconsistancy: aNbElmtId onTag: aTagId [
 		self inform: 'Inconsistency detected' ]
 ]
 
+{ #category : 'accessing' }
+Vespucci >> downloadAndBuildFamixModel [
+
+	| fileReference |
+	fileReference := colombusClient fromProjectId: projectId downloadNotebookId: notebookId.
+	notebookName := fileReference basenameWithoutExtension.
+	taggedModel := FamixPythonImporter import: fileReference.
+]
+
 { #category : 'as yet unclassified' }
 Vespucci >> exportImportsTo: aStream [
 
@@ -205,6 +234,7 @@ Vespucci >> exportImportsTo: aStream [
 		endPos := famixImport first sourceAnchor endPos asString.
 
 		"In the case we analyse simultanously multiple source, we want to keep only the imports from the notebook"
+		"Refactoring needed, notebook name should be nullable and if not present we want all the entities"
 		importingEntity := famixImport first importingEntity name.
 		isExportable := notebookName = importingEntity.
 
@@ -259,6 +289,7 @@ Vespucci >> exportInvocationsTo: aStream [
 		endPos := famixInvocation first sourceAnchor endPos asString.
 
 		"In the case we analyse simultanously multiple source, we want to keep only the invocations from the notebook"
+		"Refactoring needed, notebook name should be nullable and if not present we want all the entities"
 		sender := famixInvocation first sender name.
 		isExportable := notebookName = sender.
 
@@ -517,6 +548,18 @@ Vespucci >> postInvocations [
 		elmtID := (colombusClient createNbElmt: notebookElmt) at: 'idelmt'.
 		self checkForInconsistancy: elmtID onTag: tagId. ].
 
+]
+
+{ #category : 'accessing' }
+Vespucci >> projectId [
+
+	^ projectId
+]
+
+{ #category : 'accessing' }
+Vespucci >> projectId: aString [
+
+	projectId := aString
 ]
 
 { #category : 'accessing' }

@@ -158,6 +158,26 @@ self flag: #toDelete.
 	^ client post: url,'sousgraphfamix/search' contents: aSgFamixModelObj asDictionary. 
 ]
 
+{ #category : 'sousGraph' }
+ColombusClient >> fromProjectId: aProjectID downloadNotebookId: aNotebookId [
+
+	| res localfileReference |
+	res := ZnClient new
+		       headerAt: 'X-API-Token' add: 'profil-platform-token';
+		       get:
+			       url , 'core/api/project/' , aProjectID asString
+			       , '/notebook/' , aNotebookId asString , '/python'.
+
+	"Check if the request went well"
+	localfileReference := FileReference
+		                      newTempFilePrefix: 'pythonCode-'
+		                      suffix: '-download.py'.
+
+	localfileReference writeStreamDo: [ :aStream |
+		aStream nextPutAll: res ].
+	^ localfileReference
+]
+
 { #category : 'nbElmt' }
 ColombusClient >> getNbElmts [
 self flag: #toDelete.
@@ -168,6 +188,21 @@ self flag: #toDelete.
 ColombusClient >> getNbId: aNbId elementId: anElmtId [
 self flag: #toDelete.
 	^ client get: url,'notebook_elements/',(aNbId asString),'/',(anElmtId asString)  
+]
+
+{ #category : 'sousGraph' }
+ColombusClient >> getNotebookById: aNotebookId [
+
+	| res |
+	res := client get: url , 'core/api/notebooks/' , aNotebookId asString.
+
+	self client isSuccess ifFalse: [
+		| req code |
+		req := self client.
+		code := req response statusLine code.
+		self checkHttpCode: code ].
+
+	^ res
 ]
 
 { #category : 'sousGraph' }
