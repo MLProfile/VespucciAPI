@@ -1,0 +1,95 @@
+Class {
+	#name : 'ApiModelFullProfile',
+	#superclass : 'Object',
+	#instVars : [
+		'name',
+		'project_id',
+		'notebook_id',
+		'sous_graphs',
+		'json_profile'
+	],
+	#category : 'NotebookTag',
+	#package : 'NotebookTag'
+}
+
+{ #category : 'converting' }
+ApiModelFullProfile >> asDictionary [
+
+	^ Dictionary new
+		  at: 'name' put: name;
+		  at: 'notebook_id' put: notebook_id;
+		  at: 'project_id' put: project_id;
+		  at: 'json_profile' put: json_profile asDictionary;
+		  at: 'sous_graphs' put: sous_graphs;
+		  yourself
+]
+
+{ #category : 'initialization' }
+ApiModelFullProfile >> initialize [
+
+	name := nil.
+	project_id := nil.
+	notebook_id := nil.
+	json_profile := {}.
+	sous_graphs := nil
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> json_profile [
+
+	^ json_profile
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> json_profile: anObject [
+
+	json_profile := anObject
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> name [
+
+	^ name
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> name: anObject [
+
+	name := anObject
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> notebook_id [
+
+	^ notebook_id
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> notebook_id: anObject [
+
+	notebook_id := anObject
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> project_id [
+
+	^ project_id
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> project_id: anObject [
+
+	project_id := anObject
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> sous_graphs [
+
+	^ sous_graphs
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> sous_graphs: anObject [
+
+	sous_graphs := anObject
+]

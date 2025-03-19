@@ -60,6 +60,19 @@ ColombusClient >> client [
 	^ client
 ]
 
+{ #category : 'nbElmt' }
+ColombusClient >> createFullProfile: aApiModelFullProfile [
+"
+test := ApiModelFullProfile new.
+test notebook_id: '2a093105-d80c-4b8b-81af-f6b2fd0c771b'.
+test project_id: '4f2b506d-0817-4b73-bcef-247f77d63985'.
+test name: 'test'.
+test sous_graphs: jsonExport. 
+"
+
+	^ client post: url,'core/api/profiles' contents: aApiModelFullProfile asDictionary. 
+]
+
 { #category : 'inconsistency' }
 ColombusClient >> createIconsistencyS: aColombusModelInconsistencS [
 		

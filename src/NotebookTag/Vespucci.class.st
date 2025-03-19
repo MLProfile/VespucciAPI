@@ -25,7 +25,8 @@ Class {
 		'localfileReference',
 		'taggedModel',
 		'notebookName',
-		'projectId'
+		'projectId',
+		'exports'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -42,7 +43,7 @@ Vespucci class >> exportANotebookNamed: aString toJSonFromModel: aFamixPythonTag
 			  taggedModel: aFamixPythonTaggedModel;
 			  buildFamixModelWithAttributes;
 			  exportToJSON;
-			  exportImportsTo: stream;
+			  exportImportsTo;
 			  exportInvocationsTo: stream;
 			  yourself ]
 ]
@@ -88,17 +89,17 @@ modelA := taggedModelA model.
 Vespucci class >> fromApiComputeNotebookId: aNotebookId fromProject: aProjectId [
 	"Auto build the famix model from sources downloaded on the api"
 
-	^ String streamContents: [ :stream |
-		  self new
+
+		  ^self new
 			  notebookId: aNotebookId;
 			  projectId: aProjectId;
 			  downloadAndBuildFamixModel;
 			  buildFamixModelWithAttributes;
 			"Now we want to upload this json to the colombus api"
 			  exportToJSON;
-			  exportImportsTo: stream;
-			  exportInvocationsTo: stream;
-			  yourself ]
+			  exportImportsTo;
+			  "exportInvocationsTo: stream;"
+			  yourself 
 ]
 
 { #category : 'as yet unclassified' }
@@ -206,6 +207,54 @@ Vespucci >> downloadAndBuildFamixModel [
 	fileReference := colombusClient fromProjectId: projectId downloadNotebookId: notebookId.
 	notebookName := fileReference basenameWithoutExtension.
 	taggedModel := FamixPythonImporter import: fileReference.
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> exportImportsTo [
+
+	| jsonImports modelImport tag tagId lineStart lineEnd sgTypeId lineSource toExport startPos endPos importingEntity isExportable |
+	jsonImports := self allImportInAJsonExportedModel: localfileReference.
+	modelImport := taggedModel allImports.
+
+
+	jsonImports do: [ :i |
+		| famixImport |
+		famixImport := modelImport select: [ :importEntity |
+			               importEntity sourceAnchor startPos asString
+			               = (i at: 'startPos') and: [
+				               importEntity sourceAnchor endPos asString
+				               = (i at: 'endPos') ] ].
+		"We can have multiple entities in the same sourceAnchors pos but the tag will be the same so I just lookup for the firstone"
+		"tag := famixImport first tags first name."
+		"tagId := colombusClient getStepIdByName: tag."
+		lineStart := famixImport first sourceAnchor startLine.
+		lineEnd := famixImport first sourceAnchor endLine.
+		lineSource := famixImport first sourceAnchor sourceText.
+		startPos := famixImport first sourceAnchor startPos asString.
+		endPos := famixImport first sourceAnchor endPos asString.
+
+		"In the case we analyse simultanously multiple source, we want to keep only the imports from the notebook"
+		"Refactoring needed, notebook name should be nullable and if not present we want all the entities"
+		importingEntity := famixImport first importingEntity name.
+		isExportable := notebookName = importingEntity.
+
+		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
+		toExport := ApiModelNbElmntAndSg new.
+		toExport type_sg_id: sgTypeId.
+		toExport notebook_id: notebookId.
+		toExport step_name: 'import'.
+		toExport value: i.
+		toExport source: lineSource.
+		toExport line_start: lineStart.
+		toExport line_end: lineEnd.
+		toExport pos_start: startPos.
+		toExport pos_end: endPos.
+		toExport library: (i at: 'package').
+		toExport function: (i at: 'importOf').
+
+		isExportable ifTrue: [ exports add: toExport asDictionary ] ].
+
+	^ jsonImports
 ]
 
 { #category : 'as yet unclassified' }
@@ -330,6 +379,18 @@ Vespucci >> exportToJSON [
 	^ localfileReference
 ]
 
+{ #category : 'accessing' }
+Vespucci >> exports [
+
+	^ exports
+]
+
+{ #category : 'accessing' }
+Vespucci >> exports: anObject [
+
+	exports := anObject
+]
+
 { #category : 'as yet unclassified' }
 Vespucci >> famixElementsByLine: aTaggedFamixPythonModel [
 
@@ -357,6 +418,8 @@ Vespucci >> initialize [
 	localfileReference := FileReference
 		                      newTempFilePrefix: 'pythonModel-'
 		                      suffix: '-export.json'.
+	exports := OrderedCollection new.
+
 ]
 
 { #category : 'accessing' }
