@@ -73,104 +73,6 @@ test sous_graphs: jsonExport.
 	^ client post: url,'core/api/profiles' contents: aApiModelFullProfile asDictionary. 
 ]
 
-{ #category : 'inconsistency' }
-ColombusClient >> createIconsistencyS: aColombusModelInconsistencS [
-		
-		self flag: #toDelete.
-		
-	^ client post: url,'inconsistencies/simple' contents: aColombusModelInconsistencS asDictionary. 
-	
-]
-
-{ #category : 'nbElmt' }
-ColombusClient >> createNbElmt: aColombusModelNbElmt [
-"
-notebookRequest := ColombusModelNbElmt new.
-notebookRequest notebookId: 1.
-notebookRequest sousgraphfamix_id: 1
-notebookRequest stepId: 2.
-notebookRequest linestart: 5.
-notebookRequest lineend: 5.
-
-self createNbElmt: notebookRequest
-"
-
-self flag: #toDelete.
-	^ client post: url,'notebook_elements/' contents: aColombusModelNbElmt asDictionary. 
-]
-
-{ #category : 'nbElmt' }
-ColombusClient >> createNbElmtS: aColombusModelNbElmtS [
-"
-sgFamix := ColombusModelSg new.
-sgFamix typesgId: 1.
-sgFamix value: (Dictionary new at: 'row' put: 'from datetime import date'; yourself).
-
-notebookRequest := ColombusModelNbElmtS new.
-notebookRequest notebookId: 1.
-notebookRequest sgFamix: sgFamix
-notebookRequest stepId: 2.
-notebookRequest linestart: 5.
-notebookRequest lineend: 5.
-
-self createNbElmt: notebookRequest
-"
-
-self flag: #toDelete.
-	^ client post: url,'notebook_elements/simple/' contents: aColombusModelNbElmtS asDictionary. 
-]
-
-{ #category : 'sousGraph' }
-ColombusClient >> createSgFamix: aSgFamixObj [
-"sgFamix := ColombusModelSg new.
-sgFamix typesgId: 1.
-sgFamix value: (Dictionary new at: 'row' put: 'from datetime import date'; yourself).
-
-self createSgFamix: sgFamix."
-
-self flag: #toDelete.
-	^ client post: url,'sousgraphfamix/' contents: aSgFamixObj asDictionary. 
-]
-
-{ #category : 'inconsistency' }
-ColombusClient >> findIconsistency: anElmtMissMatchModel [
-self flag: #toDelete.
-	^ client post: url,'inconsistencies/find' contents: anElmtMissMatchModel asDictionary. 
-	
-]
-
-{ #category : 'inconsistency' }
-ColombusClient >> findIconsistencyOnElmt: anElmtId nbId: aNbId [
-
-	| res inconsistencies |
-	
-	self flag: #toDelete.
-	res := client post: url , 'inconsistencies/find' contents: {
-			       (#idnb -> aNbId).
-			       (#idelmt -> anElmtId) } asDictionary.
-	self client isSuccess
-		ifTrue: [ inconsistencies := res ]
-		ifFalse: [
-			| req code |
-			req := self client.
-			code := req response statusLine code.
-
-			code = 404 ifFalse: [
-				Error signal: 'HTTP:' , code asString , 'Server problem'.
-				"Probably a server side error , should not appen" ].
-			inconsistencies := {  } ].
-
-	^ inconsistencies
-]
-
-{ #category : 'sousGraph' }
-ColombusClient >> findSgFamix: aSgFamixModelObj [
-"If sg is find return the id"
-
-self flag: #toDelete.
-	^ client post: url,'sousgraphfamix/search' contents: aSgFamixModelObj asDictionary. 
-]
-
 { #category : 'sousGraph' }
 ColombusClient >> fromProjectId: aProjectID downloadNotebookId: aNotebookId [
 
@@ -191,18 +93,6 @@ ColombusClient >> fromProjectId: aProjectID downloadNotebookId: aNotebookId [
 	^ localfileReference
 ]
 
-{ #category : 'nbElmt' }
-ColombusClient >> getNbElmts [
-self flag: #toDelete.
-	^ client get: url,'notebook_elements/'  
-]
-
-{ #category : 'nbElmt' }
-ColombusClient >> getNbId: aNbId elementId: anElmtId [
-self flag: #toDelete.
-	^ client get: url,'notebook_elements/',(aNbId asString),'/',(anElmtId asString)  
-]
-
 { #category : 'sousGraph' }
 ColombusClient >> getNotebookById: aNotebookId [
 
@@ -218,18 +108,6 @@ ColombusClient >> getNotebookById: aNotebookId [
 	^ res
 ]
 
-{ #category : 'sousGraph' }
-ColombusClient >> getSgFamixs [
-self flag: #toDelete.
-	^ client get: url,'sousgraphfamix/'
-]
-
-{ #category : 'sousGraph' }
-ColombusClient >> getSgFamixsById: aSgFamixId [
-self flag: #toDelete.
-	^ client get: url,'sousgraphfamix/',(aSgFamixId asString)
-]
-
 { #category : 'step' }
 ColombusClient >> getSgTypeIdByValue: aSgTypeValue [
 
@@ -241,32 +119,6 @@ ColombusClient >> getSgTypeIdByValue: aSgTypeValue [
 		req := self client.
 		code := req response statusLine code.
 		self checkHttpCode: code ].
-
-	^ res at: 'id'
-]
-
-{ #category : 'step' }
-ColombusClient >> getStepById: aStepId [ 
-self flag: #toDelete.
-	^ client get: url,'steps/',(aStepId asString ) 
-]
-
-{ #category : 'step' }
-ColombusClient >> getStepIdByName: aStepName [
-
-	| res |
-	self flag: #toDelete.
-	res := client
-		       post: url , 'step/'
-		       contents: { (#name -> aStepName) } asDictionary.
-	self client isSuccess ifFalse: [
-		| req code |
-		req := self client.
-		code := req response statusLine code.
-
-		code = 404 ifFalse: [
-			Error signal: 'HTTP:' , code asString , 'Server problem' ].
-		Error signal: 'Cannot find step (should exist)' ].
 
 	^ res at: 'id'
 ]
