@@ -26,7 +26,8 @@ Class {
 		'taggedModel',
 		'notebookName',
 		'projectId',
-		'exports'
+		'exports',
+		'seenEntities'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -43,7 +44,8 @@ Vespucci class >> fromApiComputeNotebookId: aNotebookId fromProject: aProjectId 
 		  buildFamixModelWithAttributes;
 		  "Now we want to upload this json to the colombus api"exportToJSON;
 		  exportImportsTo;
-		  "exportInvocationsTo: stream;"postExportOnApi;
+		  exportInvocationsTo;
+		  postExportOnApi;
 		  yourself
 ]
 
@@ -207,6 +209,67 @@ Vespucci >> exportImportsTo: aStream [
 ]
 
 { #category : 'as yet unclassified' }
+Vespucci >> exportInvocationsTo [
+
+	| lineStart jsonInvocation modelInvocations sgTypeId lineSource toExport startPos endPos lineEnd funcSource isExportable sender composedInvoc |
+	jsonInvocation := self allInvocationInAJsonExportedModel:
+		                  localfileReference.
+	modelInvocations := taggedModel allInvocations.
+
+	jsonInvocation do: [ :i |
+		| famixInvocation |
+		famixInvocation := modelInvocations select: [ :invocationEntity |
+			                   invocationEntity sourceAnchor startPos asString
+			                   = (i at: 'startPos') and: [
+				                   invocationEntity sourceAnchor endPos asString
+				                   = (i at: 'endPos') ] ].
+
+		seenEntities add: famixInvocation mooseID. "To track seens entities to not post duplicate datas"
+
+		lineStart := famixInvocation first sourceAnchor startLine.
+		lineEnd := famixInvocation first sourceAnchor endLine.
+		funcSource := nil.
+		famixInvocation first candidates first isStub ifFalse: [
+			funcSource := famixInvocation first candidates first sourceText ].
+		
+		composedInvoc := modelInvocations select:[:i | i sourceAnchor startLine = lineStart].
+		(composedInvoc size > 1) ifTrue: [1halt.  "Here we will probably want to post these elements one by one while keeping all the nnElmnt id's to build the composed one" ].
+		
+		
+		lineSource := famixInvocation first sourceAnchor sourceText.
+		startPos := famixInvocation first sourceAnchor startPos asString.
+		endPos := famixInvocation first sourceAnchor endPos asString.
+
+		"In the case we analyse simultanously multiple source, we want to keep only the invocations from the notebook"
+		"Refactoring needed, notebook name should be nullable and if not present we want all the entities"
+		sender := famixInvocation first sender name.
+		isExportable := notebookName = sender.
+
+		"ToDo handle invocation composition"
+
+		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
+		toExport := ApiModelNbElmntAndSg new.
+		toExport type_sg_id: sgTypeId.
+		toExport notebook_id: notebookId.
+		toExport step_name: 'other'.
+		toExport value: i.
+		funcSource
+			ifNotNil: [ toExport source: funcSource , '\n ' , lineSource ]
+			ifNil: [ toExport source: lineSource ].
+		"	toExport source: lineSource."
+		toExport line_start: lineStart.
+		toExport line_end: lineEnd.
+		toExport pos_start: startPos.
+		toExport pos_end: endPos.
+		toExport library: (i at: 'library').
+		toExport function: (i at: 'function').
+
+		isExportable ifTrue: [
+			exports add: toExport asDictionary  ] ].
+
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci >> exportInvocationsTo: aStream [
 
 	| tag tagId lineStart jsonInvocation modelInvocations sgTypeId lineSource toExport jsonString startPos endPos lineEnd funcSource isExportable sender |
@@ -315,7 +378,7 @@ Vespucci >> initialize [
 		                      newTempFilePrefix: 'pythonModel-'
 		                      suffix: '-export.json'.
 	exports := OrderedCollection new.
-
+	seenEntities := OrderedCollection new.
 ]
 
 { #category : 'accessing' }
