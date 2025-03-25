@@ -89,17 +89,15 @@ modelA := taggedModelA model.
 Vespucci class >> fromApiComputeNotebookId: aNotebookId fromProject: aProjectId [
 	"Auto build the famix model from sources downloaded on the api"
 
-
-		  ^self new
-			  notebookId: aNotebookId;
-			  projectId: aProjectId;
-			  downloadAndBuildFamixModel;
-			  buildFamixModelWithAttributes;
-			"Now we want to upload this json to the colombus api"
-			  exportToJSON;
-			  exportImportsTo;
-			  "exportInvocationsTo: stream;"
-			  yourself 
+	^ self new
+		  notebookId: aNotebookId;
+		  projectId: aProjectId;
+		  downloadAndBuildFamixModel;
+		  buildFamixModelWithAttributes;
+		  "Now we want to upload this json to the colombus api"exportToJSON;
+		  exportImportsTo;
+		  "exportInvocationsTo: stream;"postExportOnApi;
+		  yourself
 ]
 
 { #category : 'as yet unclassified' }
@@ -444,6 +442,20 @@ Vespucci >> notebookName [
 Vespucci >> notebookName: astring [
 
 	notebookName := astring
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> postExportOnApi [
+	"After calling self exportImport or exportInvocations we can post those entities to the Colombus api"
+
+	| fullProfileModel |
+	fullProfileModel := ApiModelFullProfile new.
+	fullProfileModel notebook_id: notebookId.
+	fullProfileModel project_id: projectId.
+	fullProfileModel name: notebookName. "ToDo: We will want another name here"
+	fullProfileModel sous_graphs: exports.
+
+	colombusClient createFullProfile: fullProfileModel
 ]
 
 { #category : 'as yet unclassified' }
