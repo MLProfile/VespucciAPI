@@ -27,7 +27,8 @@ Class {
 		'notebookName',
 		'projectId',
 		'exports',
-		'seenEntities'
+		'seenEntities',
+		'compositions'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -47,6 +48,24 @@ Vespucci class >> fromApiComputeNotebookId: aNotebookId fromProject: aProjectId 
 		  exportInvocationsTo;
 		  postExportOnApi;
 		  yourself
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci class >> fromApiExportAsJsonNotebookId: aNotebookId fromProject: aProjectId [
+	"Auto build the famix model from sources downloaded on the api"
+
+	^ String streamContents: [ :stream |
+		  self new
+			  notebookId: aNotebookId;
+			  projectId: aProjectId;
+			  downloadAndBuildFamixModel;
+			  buildFamixModelWithAttributes;
+			  "Now we want to upload this json to the colombus api"
+				  exportToJSON;
+			  exportImportsTo;
+			  exportInvocationsTo;
+			  postExportJsonTo: stream;
+			  yourself ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -99,12 +118,47 @@ Vespucci >> buildFamixModelWithAttributes [
 ]
 
 { #category : 'accessing' }
+Vespucci >> compositions [
+
+	^ compositions
+]
+
+{ #category : 'accessing' }
+Vespucci >> compositions: anObject [
+
+	compositions := anObject
+]
+
+{ #category : 'accessing' }
 Vespucci >> downloadAndBuildFamixModel [
 
 	| fileReference |
 	fileReference := colombusClient fromProjectId: projectId downloadNotebookId: notebookId.
 	notebookName := fileReference basenameWithoutExtension.
 	taggedModel := FamixPythonImporter import: fileReference.
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> exportComposition: aMooseGroup [
+	"Here we will add all the items to export and there positions in compositions"
+
+	| composite_index component_indices element |
+	composite_index := exports size - 1.
+
+	"Ne fonctionne pas, les invocation ne sont probablement pas dans l'ordre on va donc devoir utiliser les seens pour les ajouer ici dans export et ne pas le refaire dans exportInvocations"
+	component_indices := OrderedCollection new.
+	1 to: (aMooseGroup size -1) do: [ :i |
+	component_indices add: composite_index + i ].
+
+
+	element := Dictionary new.
+	element at: #composite_index put: composite_index.
+	element at: #component_indices put: component_indices.
+
+
+	compositions add: element.
+
+	1 halt
 ]
 
 { #category : 'as yet unclassified' }
@@ -224,18 +278,20 @@ Vespucci >> exportInvocationsTo [
 				                   invocationEntity sourceAnchor endPos asString
 				                   = (i at: 'endPos') ] ].
 
-		seenEntities add: famixInvocation mooseID. "To track seens entities to not post duplicate datas"
+
 
 		lineStart := famixInvocation first sourceAnchor startLine.
 		lineEnd := famixInvocation first sourceAnchor endLine.
 		funcSource := nil.
 		famixInvocation first candidates first isStub ifFalse: [
 			funcSource := famixInvocation first candidates first sourceText ].
-		
-		composedInvoc := modelInvocations select:[:i | i sourceAnchor startLine = lineStart].
-		(composedInvoc size > 1) ifTrue: [1halt.  "Here we will probably want to post these elements one by one while keeping all the nnElmnt id's to build the composed one" ].
-		
-		
+
+		composedInvoc := modelInvocations select: [ :i |
+			                 i sourceAnchor startLine = lineStart ].
+		composedInvoc size > 1 ifTrue: [ "Here we will probably want to post these elements one by one while keeping all the nnElmnt id's to build the composed one"
+			self exportComposition: composedInvoc ].
+
+		seenEntities add: famixInvocation mooseID. "To track seens entities to not post duplicate datas"
 		lineSource := famixInvocation first sourceAnchor sourceText.
 		startPos := famixInvocation first sourceAnchor startPos asString.
 		endPos := famixInvocation first sourceAnchor endPos asString.
@@ -264,9 +320,7 @@ Vespucci >> exportInvocationsTo [
 		toExport library: (i at: 'library').
 		toExport function: (i at: 'function').
 
-		isExportable ifTrue: [
-			exports add: toExport asDictionary  ] ].
-
+		isExportable ifTrue: [ exports add: toExport asDictionary ] ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -378,6 +432,7 @@ Vespucci >> initialize [
 		                      newTempFilePrefix: 'pythonModel-'
 		                      suffix: '-export.json'.
 	exports := OrderedCollection new.
+	compositions := OrderedCollection new.
 	seenEntities := OrderedCollection new.
 ]
 
@@ -406,6 +461,22 @@ Vespucci >> notebookName: astring [
 ]
 
 { #category : 'as yet unclassified' }
+Vespucci >> postExportJsonTo: aStream [
+	"After calling self exportImport or exportInvocations we can post those entities to the Colombus api"
+
+	| fullProfileModel jsonString |
+	fullProfileModel := ApiModelFullProfile new.
+	fullProfileModel notebook_id: notebookId.
+	fullProfileModel project_id: projectId.
+	fullProfileModel name: notebookName. "ToDo: We will want another name here"
+	fullProfileModel sous_graphs: exports.
+	fullProfileModel compositions: compositions.
+
+	jsonString := NeoJSONWriter toString: fullProfileModel asDictionary.
+	aStream nextPutAll: jsonString
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci >> postExportOnApi [
 	"After calling self exportImport or exportInvocations we can post those entities to the Colombus api"
 
@@ -415,6 +486,7 @@ Vespucci >> postExportOnApi [
 	fullProfileModel project_id: projectId.
 	fullProfileModel name: notebookName. "ToDo: We will want another name here"
 	fullProfileModel sous_graphs: exports.
+	fullProfileModel compositions: compositions.
 
 	colombusClient createFullProfile: fullProfileModel
 ]

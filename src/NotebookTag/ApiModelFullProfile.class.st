@@ -6,7 +6,8 @@ Class {
 		'project_id',
 		'notebook_id',
 		'sous_graphs',
-		'json_profile'
+		'json_profile',
+		'compositions'
 	],
 	#category : 'NotebookTag',
 	#package : 'NotebookTag'
@@ -21,7 +22,20 @@ ApiModelFullProfile >> asDictionary [
 		  at: 'project_id' put: project_id;
 		  at: 'json_profile' put: json_profile asDictionary;
 		  at: 'sous_graphs' put: sous_graphs;
+		  at: 'compositions' put: compositions;
 		  yourself
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> compositions [
+
+	^ compositions
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> compositions: anObject [
+
+	compositions := anObject
 ]
 
 { #category : 'initialization' }
@@ -31,7 +45,8 @@ ApiModelFullProfile >> initialize [
 	project_id := nil.
 	notebook_id := nil.
 	json_profile := {}.
-	sous_graphs := nil
+	sous_graphs := nil.
+	compositions := nil
 ]
 
 { #category : 'accessing' }
