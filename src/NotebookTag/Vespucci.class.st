@@ -43,9 +43,9 @@ Vespucci class >> fromApiComputeNotebookId: aNotebookId fromProject: aProjectId 
 		  projectId: aProjectId;
 		  downloadAndBuildFamixModel;
 		  buildFamixModelWithAttributes;
-		  "Now we want to upload this json to the colombus api"exportToJSON;
-		  exportImportsTo;
-		  exportInvocationsTo;
+		  exportToJSON;
+		  exportImports;
+		  exportInvocations;
 		  postExportOnApi;
 		  yourself
 ]
@@ -60,27 +60,8 @@ Vespucci class >> fromApiExportAsJsonNotebookId: aNotebookId fromProject: aProje
 			  projectId: aProjectId;
 			  downloadAndBuildFamixModel;
 			  buildFamixModelWithAttributes;
-			  "Now we want to upload this json to the colombus api"
-				  exportToJSON;
-			  exportImportsTo;
-			  exportInvocationsTo;
-			  postExportJsonTo: stream;
-			  yourself ]
-]
-
-{ #category : 'as yet unclassified' }
-Vespucci class >> fromApiExportAsJsonNotebookIdRefactored: aNotebookId fromProject: aProjectId [
-	"Auto build the famix model from sources downloaded on the api"
-
-	^ String streamContents: [ :stream |
-		  self new
-			  notebookId: aNotebookId;
-			  projectId: aProjectId;
-			  downloadAndBuildFamixModel;
-			  buildFamixModelWithAttributes;
-			  "Now we want to upload this json to the colombus api"
-				  exportToJSON;
-			  exportImportsTo; "Need refacto"
+			  exportToJSON;
+			  exportImports;
 			  exportInvocations;
 			  postExportJsonTo: stream;
 			  yourself ]
@@ -102,6 +83,42 @@ Vespucci >> allInvocationInAJsonExportedModel: aFileReference [
 | export |
 export := (NeoJSONReader on: aFileReference readStream) next.
 ^export select: [ :e | (e at:'FM3' ifAbsent: [  ]) = 'Famix-Python-Entities.Invocation' ] 
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> buildExportImportFor: aFamixImport withJson: jsonDict [
+
+	| exportObject lineStart lineEnd lineSource startPos endPos funcSource sgTypeId |
+	
+	"Récupération des informations sources"
+	lineStart := aFamixImport sourceAnchor startLine.
+	lineEnd   := aFamixImport sourceAnchor endLine.
+	lineSource := aFamixImport sourceAnchor sourceText.
+	startPos  := aFamixImport sourceAnchor startPos asString.
+	endPos    := aFamixImport sourceAnchor endPos asString.
+
+
+	"Récupération du type SG"
+	sgTypeId := colombusClient getSgTypeIdByValue: (jsonDict at: 'FM3').
+
+	"Construction de l'objet"
+	exportObject := ApiModelNbElmntAndSg new.
+	exportObject type_sg_id: sgTypeId;
+	             notebook_id: notebookId;
+	             step_name: 'import';
+	             value: jsonDict.
+	
+
+	exportObject
+		source: lineSource; 
+		line_start: lineStart;
+		line_end: lineEnd;
+		pos_start: startPos;
+		pos_end: endPos;
+		library: (jsonDict at: 'package');
+		function: (jsonDict at: 'importOf').
+
+	^ exportObject
 ]
 
 { #category : 'as yet unclassified' }
@@ -150,9 +167,11 @@ Vespucci >> buildExportObjectFor: aFamixInvocation withJson: jsonDict [
 
 { #category : 'as yet unclassified' }
 Vespucci >> buildFamixModelWithAttributes [
+	"From the builded model in self downloadAndBuildFamixModel, we assign some tags on imports and invocations 
+	to keep informations when we will export this model in json."
 
 	| model |
-	model := taggedModel. "Surtout pas de copie ici pour le coup"
+	model := taggedModel.
 
 	model allImports do: [ :i |
 		i importedEntity
@@ -160,7 +179,7 @@ Vespucci >> buildFamixModelWithAttributes [
 				i importOf: i importedEntity name.
 				i package: i importedEntity libraryName ]
 			ifNil: [
-				1halt.
+				1 halt.
 				i importOf: 'parse_error'.
 				i package: 'parse_error' ].
 
@@ -193,15 +212,18 @@ Vespucci >> compositions: anObject [
 
 { #category : 'accessing' }
 Vespucci >> downloadAndBuildFamixModel [
+	"We dowload the python source code of notebookId from projectId and create the corresponding FamixPythonModel"
 
 	| fileReference |
-	fileReference := colombusClient fromProjectId: projectId downloadNotebookId: notebookId.
+	fileReference := colombusClient
+		                 fromProjectId: projectId
+		                 downloadNotebookId: notebookId.
 	notebookName := fileReference basenameWithoutExtension.
-	taggedModel := FamixPythonImporter import: fileReference.
+	taggedModel := FamixPythonImporter import: fileReference
 ]
 
 { #category : 'as yet unclassified' }
-Vespucci >> exportComposition2: aMooseGroup [
+Vespucci >> exportComposition: aMooseGroup [
 
 	| famixInvocation compositeExport compositeDict componentsExports element isExportable |
 
@@ -216,7 +238,7 @@ Vespucci >> exportComposition2: aMooseGroup [
 	"Déterminer si on exporte ou pas"
 	isExportable := self shouldExport: famixInvocation.
 
-	"On a gerer cette entite on peut donc l'ajouté a la liste"
+	"On a gerer cette entite on peut donc l'ajouter a la liste"
 	seenEntities add: famixInvocation mooseID.
 	"On supprime l’invocation principale du group pour gérer ensuite les composantes"
 	aMooseGroup remove: famixInvocation.
@@ -242,209 +264,25 @@ Vespucci >> exportComposition2: aMooseGroup [
 ]
 
 { #category : 'as yet unclassified' }
-Vespucci >> exportComposition: aMooseGroup [
-	"Here we will add all the items to export and there positions in compositions"
+Vespucci >> exportImports [
 
-	| element json_invoc lineStart famixInvocation lineEnd funcSource sender isExportable lineSource startPos endPos sgTypeId toExport components_exports index |
-	famixInvocation := aMooseGroup first.
-	startPos := famixInvocation sourceAnchor startPos asString.
-	endPos := famixInvocation sourceAnchor endPos asString.
-
-
-	json_invoc := self
-		              invocationInAJsonExportedModel: localfileReference
-		              withStartPos: startPos
-		              andEndPos: endPos.
-
-	json_invoc := json_invoc first.
-	lineStart := famixInvocation sourceAnchor startLine.
-	lineEnd := famixInvocation sourceAnchor endLine.
-	funcSource := nil.
-	famixInvocation candidates first isStub ifFalse: [
-		funcSource := famixInvocation candidates first sourceText ].
-
-	sender := famixInvocation sender name.
-	isExportable := notebookName = sender.
-	index := seenEntities indexOf: famixInvocation mooseID.
-	index = 0 ifFalse: [ isExportable := false ].
-
-	seenEntities add: famixInvocation mooseID.
-	lineSource := famixInvocation sourceAnchor sourceText.
-
-
-	sgTypeId := colombusClient getSgTypeIdByValue: (json_invoc at: 'FM3').
-	toExport := ApiModelNbElmntAndSg new.
-	toExport type_sg_id: sgTypeId.
-	toExport notebook_id: notebookId.
-	toExport step_name: 'other'.
-	toExport value: json_invoc.
-	funcSource
-		ifNotNil: [ toExport source: funcSource , '\n ' , lineSource ]
-		ifNil: [ toExport source: lineSource ].
-	toExport line_start: lineStart.
-	toExport line_end: lineEnd.
-	toExport pos_start: startPos.
-	toExport pos_end: endPos.
-	toExport library: (json_invoc at: 'library').
-	toExport function: (json_invoc at: 'function').
-
-
-	element := Dictionary new.
-	element at: #composite put: toExport asDictionary.
-
-
-	components_exports := OrderedCollection new.
-	aMooseGroup remove: famixInvocation.
-
-	aMooseGroup do: [ :i |
-		startPos := i sourceAnchor startPos asString.
-		endPos := i sourceAnchor endPos asString.
-
-
-		json_invoc := self
-			              invocationInAJsonExportedModel: localfileReference
-			              withStartPos: startPos
-			              andEndPos: endPos.
-
-		json_invoc := json_invoc first.
-		lineStart := i sourceAnchor startLine.
-		lineEnd := i sourceAnchor endLine.
-		funcSource := nil.
-		i candidates first isStub ifFalse: [
-			funcSource := i candidates first sourceText ].
-
-		seenEntities add: i mooseID.
-
-		lineSource := i sourceAnchor sourceText.
-
-
-		sgTypeId := colombusClient getSgTypeIdByValue:
-			            (json_invoc at: 'FM3').
-		toExport := ApiModelNbElmntAndSg new.
-		toExport type_sg_id: sgTypeId.
-		toExport notebook_id: notebookId.
-		toExport step_name: 'other'.
-		toExport value: json_invoc.
-		funcSource
-			ifNotNil: [ toExport source: funcSource , '\n ' , lineSource ]
-			ifNil: [ toExport source: lineSource ].
-		toExport line_start: lineStart.
-		toExport line_end: lineEnd.
-		toExport pos_start: startPos.
-		toExport pos_end: endPos.
-		toExport library: (json_invoc at: 'library').
-		toExport function: (json_invoc at: 'function').
-
-		seenEntities add: i mooseID.
-		components_exports add: toExport asDictionary ].
-
-
-
-
-	element at: #components put: components_exports.
-
-	isExportable ifTrue: [ compositions add: element ]
-]
-
-{ #category : 'as yet unclassified' }
-Vespucci >> exportImportsTo [
-
-	| jsonImports modelImport lineStart lineEnd sgTypeId lineSource toExport startPos endPos importingEntity isExportable |
+	| jsonImports modelImport toExport importingEntity isExportable |
 	jsonImports := self allImportInAJsonExportedModel: localfileReference.
 	modelImport := taggedModel allImports.
 
 
 	jsonImports do: [ :i |
 		| famixImport |
-		famixImport := modelImport select: [ :importEntity |
-			               importEntity sourceAnchor startPos asString
-			               = (i at: 'startPos') and: [
-				               importEntity sourceAnchor endPos asString
-				               = (i at: 'endPos') ] ].
-		"We can have multiple entities in the same sourceAnchors pos but the tag will be the same so I just lookup for the firstone"
-		"tag := famixImport first tags first name."
-		"tagId := colombusClient getStepIdByName: tag."
-		lineStart := famixImport first sourceAnchor startLine.
-		lineEnd := famixImport first sourceAnchor endLine.
-		lineSource := famixImport first sourceAnchor sourceText.
-		startPos := famixImport first sourceAnchor startPos asString.
-		endPos := famixImport first sourceAnchor endPos asString.
+		famixImport := self importsMatchingJson: i in: modelImport.
 
 		"In the case we analyse simultanously multiple source, we want to keep only the imports from the notebook"
 		"Refactoring needed, notebook name should be nullable and if not present we want all the entities"
 		importingEntity := famixImport first importingEntity name.
 		isExportable := notebookName = importingEntity.
 
-		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
-		toExport := ApiModelNbElmntAndSg new.
-		toExport type_sg_id: sgTypeId.
-		toExport notebook_id: notebookId.
-		toExport step_name: 'import'.
-		toExport value: i.
-		toExport source: lineSource.
-		toExport line_start: lineStart.
-		toExport line_end: lineEnd.
-		toExport pos_start: startPos.
-		toExport pos_end: endPos.
-		toExport library: (i at: 'package').
-		toExport function: (i at: 'importOf').
+		toExport := self buildExportImportFor: famixImport first withJson: i.
 
-		isExportable ifTrue: [ exports add: toExport asDictionary ] ].
-
-"	^ jsonImports"
-]
-
-{ #category : 'as yet unclassified' }
-Vespucci >> exportImportsTo: aStream [
-
-	| jsonImports modelImport tag tagId lineStart lineEnd sgTypeId lineSource toExport jsonString first startPos endPos importingEntity isExportable |
-	jsonImports := self allImportInAJsonExportedModel: localfileReference.
-	modelImport := taggedModel allImports.
-
-	aStream nextPutAll: '['.
-	first := true.
-	jsonImports do: [ :i |
-		| famixImport |
-		famixImport := modelImport select: [ :importEntity |
-			               importEntity sourceAnchor startPos asString
-			               = (i at: 'startPos') and: [
-				               importEntity sourceAnchor endPos asString
-				               = (i at: 'endPos') ] ].
-		"We can have multiple entities in the same sourceAnchors pos but the tag will be the same so I just lookup for the firstone"
-		"tag := famixImport first tags first name."
-		"tagId := colombusClient getStepIdByName: tag."
-		lineStart := famixImport first sourceAnchor startLine.
-		lineEnd := famixImport first sourceAnchor endLine.
-		lineSource := famixImport first sourceAnchor sourceText.
-		startPos := famixImport first sourceAnchor startPos asString.
-		endPos := famixImport first sourceAnchor endPos asString.
-
-		"In the case we analyse simultanously multiple source, we want to keep only the imports from the notebook"
-		"Refactoring needed, notebook name should be nullable and if not present we want all the entities"
-		importingEntity := famixImport first importingEntity name.
-		isExportable := notebookName = importingEntity.
-
-		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
-		toExport := ApiModelNbElmntAndSg new.
-		toExport type_sg_id: sgTypeId.
-		toExport notebook_id: notebookId.
-		toExport step_name: 'import'.
-		toExport value: i.
-		toExport source: lineSource.
-		toExport line_start: lineStart.
-		toExport line_end: lineEnd.
-		toExport pos_start: startPos.
-		toExport pos_end: endPos.
-		toExport library: (i at: 'package').
-		toExport function: (i at: 'importOf').
-
-		isExportable ifTrue: [
-			jsonString := NeoJSONWriter toString: toExport asDictionary.
-			first ifFalse: [ aStream nextPut: $, ].
-			aStream nextPutAll: jsonString.
-			first := false ] ].
-
-	^ jsonImports
+		isExportable ifTrue: [ exports add: toExport asDictionary ] ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -469,10 +307,10 @@ Vespucci >> exportInvocations [
 		"S’il y a plusieurs invocations sur la même ligne, on gère la composition"
 		(composedInvoc size > 1)
 			ifTrue: [
-				self exportComposition2: composedInvoc
+				self exportComposition: composedInvoc
 			]
 			ifFalse: [
-				"3) Traitement normal d’une invocation simple"
+				"Traitement normal d’une invocation simple"
 				isExportable := self shouldExport: famixInvocation first.
 				isExportable ifTrue: [
 					seenEntities add: famixInvocation mooseID.
@@ -485,131 +323,9 @@ Vespucci >> exportInvocations [
 ]
 
 { #category : 'as yet unclassified' }
-Vespucci >> exportInvocationsTo [
-
-	| lineStart jsonInvocation modelInvocations sgTypeId lineSource toExport startPos endPos lineEnd funcSource isExportable sender composedInvoc |
-	jsonInvocation := self allInvocationInAJsonExportedModel:
-		                  localfileReference.
-	modelInvocations := taggedModel allInvocations.
-
-	jsonInvocation do: [ :i |
-		| famixInvocation |
-		famixInvocation := modelInvocations select: [ :invocationEntity |
-			                   invocationEntity sourceAnchor startPos asString
-			                   = (i at: 'startPos') and: [
-				                   invocationEntity sourceAnchor endPos asString
-				                   = (i at: 'endPos') ] ].
-
-
-
-		lineStart := famixInvocation first sourceAnchor startLine.
-		lineEnd := famixInvocation first sourceAnchor endLine.
-		funcSource := nil.
-		famixInvocation first candidates first isStub ifFalse: [
-			funcSource := famixInvocation first candidates first sourceText ].
-
-		composedInvoc := modelInvocations select: [ :i |
-			                 i sourceAnchor startLine = lineStart ].
-		composedInvoc size > 1
-			ifTrue: [ "Here we will probably want to post these elements one by one while keeping all the nnElmnt id's to build the composed one"
-				self exportComposition: composedInvoc.
-				isExportable := false ]
-			ifFalse: [
-				seenEntities add: famixInvocation mooseID. "To track seens entities to not post duplicate datas"
-
-				"In the case we analyse simultanously multiple source, we want to keep only the invocations from the notebook"
-				"Refactoring needed, notebook name should be nullable and if not present we want all the entities"
-				sender := famixInvocation first sender name.
-				isExportable := notebookName = sender ].
-
-
-		lineSource := famixInvocation first sourceAnchor sourceText.
-		startPos := famixInvocation first sourceAnchor startPos asString.
-		endPos := famixInvocation first sourceAnchor endPos asString.
-
-		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
-		toExport := ApiModelNbElmntAndSg new.
-		toExport type_sg_id: sgTypeId.
-		toExport notebook_id: notebookId.
-		toExport step_name: 'other'.
-		toExport value: i.
-		funcSource
-			ifNotNil: [ toExport source: funcSource , '\n ' , lineSource ]
-			ifNil: [ toExport source: lineSource ].
-		"	toExport source: lineSource."
-		toExport line_start: lineStart.
-		toExport line_end: lineEnd.
-		toExport pos_start: startPos.
-		toExport pos_end: endPos.
-		toExport library: (i at: 'library').
-		toExport function: (i at: 'function').
-
-		isExportable ifTrue: [ exports add: toExport asDictionary ] ]
-]
-
-{ #category : 'as yet unclassified' }
-Vespucci >> exportInvocationsTo: aStream [
-
-	| tag tagId lineStart jsonInvocation modelInvocations sgTypeId lineSource toExport jsonString startPos endPos lineEnd funcSource isExportable sender |
-	jsonInvocation := self allInvocationInAJsonExportedModel:
-		                  localfileReference.
-	modelInvocations := taggedModel allInvocations.
-
-	jsonInvocation do: [ :i |
-		| famixInvocation |
-		famixInvocation := modelInvocations select: [ :invocationEntity |
-			                   invocationEntity sourceAnchor startPos asString
-			                   = (i at: 'startPos') and: [
-				                   invocationEntity sourceAnchor endPos asString
-				                   = (i at: 'endPos') ] ].
-
-		"tag := famixInvocation first tags first name."
-		"tagId := colombusClient getStepIdByName: tag."
-		lineStart := famixInvocation first sourceAnchor startLine.
-		lineEnd := famixInvocation first sourceAnchor endLine.
-		funcSource := nil.
-		famixInvocation first candidates first isStub ifFalse: [
-			funcSource := famixInvocation first candidates first sourceText ].
-		lineSource := famixInvocation first sourceAnchor sourceText.
-		startPos := famixInvocation first sourceAnchor startPos asString.
-		endPos := famixInvocation first sourceAnchor endPos asString.
-
-		"In the case we analyse simultanously multiple source, we want to keep only the invocations from the notebook"
-		"Refactoring needed, notebook name should be nullable and if not present we want all the entities"
-		sender := famixInvocation first sender name.
-		isExportable := notebookName = sender.
-
-		"ToDo handle invocation composition"
-
-		sgTypeId := colombusClient getSgTypeIdByValue: (i at: 'FM3').
-		toExport := ApiModelNbElmntAndSg new.
-		toExport type_sg_id: sgTypeId.
-		toExport notebook_id: notebookId.
-		toExport step_name: 'other'.
-		toExport value: i.
-		funcSource
-			ifNotNil: [ toExport source: funcSource , '\n ' , lineSource ]
-			ifNil: [ toExport source: lineSource ].
-		"	toExport source: lineSource."
-		toExport line_start: lineStart.
-		toExport line_end: lineEnd.
-		toExport pos_start: startPos.
-		toExport pos_end: endPos.
-		toExport library: (i at: 'library').
-		toExport function: (i at: 'function').
-
-		isExportable ifTrue: [
-			jsonString := NeoJSONWriter toString: toExport asDictionary.
-			aStream nextPut: $,.
-			aStream nextPutAll: jsonString ] ].
-
-	aStream nextPutAll: ']'.
-	^ aStream
-]
-
-{ #category : 'as yet unclassified' }
 Vespucci >> exportToJSON [
-"We need to run self buildFamixModelWithAttributes first"
+	"We need to run self buildFamixModelWithAttributes first. The result is a tagged model with the informations we need
+	 We then export this model in json on localfileReference"
 
 	localfileReference writeStreamDo: [ :aStream |
 		taggedModel exportToJSONStream: aStream ].
@@ -646,6 +362,15 @@ Vespucci >> famixElementsByLine: aTaggedFamixPythonModel [
 				sourceAnchor ] ].
 
 	^ dictionary
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> importsMatchingJson: aJson in: modelImports [
+
+	^ modelImports select: [ :importEntity |
+		  importEntity sourceAnchor startPos asString
+		  = (aJson at: 'startPos') and: [
+			  importEntity sourceAnchor endPos asString = (aJson at: 'endPos') ] ]
 ]
 
 { #category : 'initialization' }
@@ -767,6 +492,11 @@ Vespucci >> projectId: aString [
 
 { #category : 'asserting' }
 Vespucci >> shouldExport: aFamixInvocation [
+"Si l'entité ne vient pas directement du notebook (ex: si l'on a un nb et des sources de lib)
+ou si l'on a deja vu l'entitié (ex: dans le cas des compositions on traite toutes les entités d'une ligne).
+Dans ces deux cas pour eviter les doublon et ne pas polluer l'export => false.
+"
+
 	| sender index |
 	sender := aFamixInvocation sender name.
 	index  := seenEntities indexOf: aFamixInvocation mooseID.
