@@ -1,6 +1,6 @@
 Extension { #name : 'FamixPythonImport' }
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonImport >> endPos [ 
 
     <FMProperty: #endPos type: #String>
@@ -8,13 +8,13 @@ FamixPythonImport >> endPos [
     ^ self attributeAt: #endPos ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonImport >> endPos: aPosString [ 
 
     self attributeAt: #endPos put: aPosString.
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonImport >> importOf [ 
 
     <FMProperty: #importOf type: #String>
@@ -22,13 +22,13 @@ FamixPythonImport >> importOf [
     ^ self attributeAt: #importOf ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonImport >> importOf: anImportedEntityName [ 
 
     self attributeAt: #importOf put: anImportedEntityName.
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonImport >> package [ 
 
     <FMProperty: #package type: #String>
@@ -36,13 +36,13 @@ FamixPythonImport >> package [
     ^ self attributeAt: #package ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonImport >> package: aPackageNane [ 
 
     self attributeAt: #package put: aPackageNane.
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonImport >> startPos [ 
 
     <FMProperty: #startPos type: #String>
@@ -50,7 +50,7 @@ FamixPythonImport >> startPos [
     ^ self attributeAt: #startPos ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonImport >> startPos: aPosString [ 
 
     self attributeAt: #startPos put: aPosString.

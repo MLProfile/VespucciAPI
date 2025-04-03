@@ -1,6 +1,6 @@
 Extension { #name : 'TEntityMetaLevelDependency' }
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 TEntityMetaLevelDependency >> libraryName [
 
 	| module toPrint current |

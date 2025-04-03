@@ -9,8 +9,8 @@ Class {
 		'json_profile',
 		'compositions'
 	],
-	#category : 'NotebookTag',
-	#package : 'NotebookTag'
+	#category : 'VespucciNotebookElementExtractor',
+	#package : 'VespucciNotebookElementExtractor'
 }
 
 { #category : 'converting' }

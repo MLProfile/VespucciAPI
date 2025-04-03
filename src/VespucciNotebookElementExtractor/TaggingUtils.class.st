@@ -1,8 +1,8 @@
 Class {
 	#name : 'TaggingUtils',
 	#superclass : 'Object',
-	#category : 'NotebookTag',
-	#package : 'NotebookTag'
+	#category : 'VespucciNotebookElementExtractor',
+	#package : 'VespucciNotebookElementExtractor'
 }
 
 { #category : 'as yet unclassified' }

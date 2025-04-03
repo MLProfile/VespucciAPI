@@ -15,8 +15,8 @@ Class {
 		'pos_end',
 		'is_composition'
 	],
-	#category : 'NotebookTag',
-	#package : 'NotebookTag'
+	#category : 'VespucciNotebookElementExtractor',
+	#package : 'VespucciNotebookElementExtractor'
 }
 
 { #category : 'converting' }

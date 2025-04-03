@@ -1,6 +1,6 @@
 Extension { #name : 'FamixPythonInvocation' }
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> arguments [ 
 
     <FMProperty: #arguments type: #String>
@@ -8,13 +8,13 @@ FamixPythonInvocation >> arguments [
     ^ self attributeAt: #arguments ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> arguments: anArgumentcollection [ 
 
 	self attributeAt: #arguments put: anArgumentcollection.
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> computeArgs [
 
 	| text start end paramsAsString level i char paramsList currentParam |
@@ -52,7 +52,7 @@ FamixPythonInvocation >> computeArgs [
 	^ paramsList
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> computePackage [
 
 	| module toPrint current parent |
@@ -73,7 +73,7 @@ FamixPythonInvocation >> computePackage [
 	^ $. join: (toPrint reverse collect: #name)
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> endPos [ 
 
     <FMProperty: #endPos type: #String>
@@ -81,13 +81,13 @@ FamixPythonInvocation >> endPos [
     ^ self attributeAt: #endPos ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> endPos: aPosString [ 
 
     self attributeAt: #endPos put: aPosString.
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> function [ 
 
     <FMProperty: #function type: #String>
@@ -95,13 +95,13 @@ FamixPythonInvocation >> function [
     ^ self attributeAt: #function ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> function: aFunctionName [ 
 
     self attributeAt: #function put: aFunctionName.
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> library [ 
 
     <FMProperty: #library type: #String>
@@ -109,13 +109,13 @@ FamixPythonInvocation >> library [
     ^ self attributeAt: #library ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> library: aLibraryName [ 
 
     self attributeAt: #library put: aLibraryName.
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> startPos [ 
 
     <FMProperty: #startPos type: #String>
@@ -123,7 +123,7 @@ FamixPythonInvocation >> startPos [
     ^ self attributeAt: #startPos ifAbsent: [  ]
 ]
 
-{ #category : '*NotebookTag' }
+{ #category : '*VespucciNotebookElementExtractor' }
 FamixPythonInvocation >> startPos: aPosString [ 
 
     self attributeAt: #startPos put: aPosString.

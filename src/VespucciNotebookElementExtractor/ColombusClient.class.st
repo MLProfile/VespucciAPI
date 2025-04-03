@@ -5,8 +5,8 @@ Class {
 		'client',
 		'url'
 	],
-	#category : 'NotebookTag-API',
-	#package : 'NotebookTag',
+	#category : 'VespucciNotebookElementExtractor-API',
+	#package : 'VespucciNotebookElementExtractor',
 	#tag : 'API'
 }
 

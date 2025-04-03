@@ -22,8 +22,8 @@ Class {
 		'filename',
 		'model'
 	],
-	#category : 'NotebookTag',
-	#package : 'NotebookTag'
+	#category : 'VespucciNotebookElementExtractor',
+	#package : 'VespucciNotebookElementExtractor'
 }
 
 { #category : 'as yet unclassified' }
