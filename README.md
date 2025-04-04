@@ -1,4 +1,4 @@
-# Vespucci Builder
+# Vespucci Notebook Extractor API
 
 This class can retrive a notebook python code from Colombus API, build a FamixPythonModel with it and exports all the founded elements in this model either throught api or json.  
 
