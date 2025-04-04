@@ -6,7 +6,7 @@ This class can retrive a notebook python code from Colombus API, build a FamixPy
 
 ```smalltalk
 Metacello new
-    githubUser: 'JMLF' project: 'NotebookTaggingUtils' commitish: 'master' path: 'src';
+    githubUser: 'JMLF' project: 'VespucciAPI' commitish: 'master' path: 'src';
     baseline: 'VespucciNotebookElementExtractor';
     load
 ```
