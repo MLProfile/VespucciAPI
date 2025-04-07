@@ -26,5 +26,6 @@ BaselineOfVespucciNotebookElementExtractor >> defineDependencies: spec [
 { #category : 'packages' }
 BaselineOfVespucciNotebookElementExtractor >> definePackages: spec [
     spec
-        package: 'VespucciNotebookElementExtractor' with: [ spec requires: #( 'MoosePy' ) ]
+        package: 'VespucciNotebookElementExtractor' with: [ spec requires: #( 'MoosePy' ) ];
+		  package: 'ColombusAPI' 
 ]

@@ -38,8 +38,8 @@ Class {
 		'jsonConf',
 		'apiToken'
 	],
-	#category : 'VespucciNotebookElementExtractor-API',
-	#package : 'VespucciNotebookElementExtractor',
+	#category : 'ColombusAPI-API',
+	#package : 'ColombusAPI',
 	#tag : 'API'
 }
 

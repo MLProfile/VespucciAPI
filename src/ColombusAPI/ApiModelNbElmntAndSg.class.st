@@ -15,8 +15,8 @@ Class {
 		'pos_end',
 		'is_composition'
 	],
-	#category : 'VespucciNotebookElementExtractor',
-	#package : 'VespucciNotebookElementExtractor'
+	#category : 'ColombusAPI',
+	#package : 'ColombusAPI'
 }
 
 { #category : 'converting' }

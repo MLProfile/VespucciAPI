@@ -9,8 +9,8 @@ Class {
 		'json_profile',
 		'compositions'
 	],
-	#category : 'VespucciNotebookElementExtractor',
-	#package : 'VespucciNotebookElementExtractor'
+	#category : 'ColombusAPI',
+	#package : 'ColombusAPI'
 }
 
 { #category : 'converting' }
