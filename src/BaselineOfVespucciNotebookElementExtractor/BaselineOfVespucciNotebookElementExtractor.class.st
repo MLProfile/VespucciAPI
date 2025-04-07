@@ -21,6 +21,11 @@ BaselineOfVespucciNotebookElementExtractor >> defineDependencies: spec [
         baseline: 'MoosePy'
         with: [ spec
             repository: 'github://moosetechnology/MoosePy:master/src' ].
+    spec
+        baseline: 'Teapot'
+        with: [ spec
+            repository: 'github://zeroflag/teapot:master/source' ].
+
 ]
 
 { #category : 'packages' }
