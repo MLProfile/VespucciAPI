@@ -1,9 +1,42 @@
+"
+# Api client class
+
+Define callable endpoint to the colombus api. Take ApiModel class for posts requests.
+
+## Usage 
+To set the url and/or token you have multiple class side methods.
+
+Manually set the uri :
+```language=Pharo
+client := ColombusClient createClientWithUrl: 'http://127.0.0.1'. 
+```
+Manually set the uri and token :
+```language=Pharo
+client := ColombusClient createClientWithUrl: 'http://127.0.0.1' andKey: 'yourApiKey'. 
+```
+
+Read from a conf file :
+```language=Pharo
+client := ColombusClient createClientFromConfFile: '.conf'. 
+```
+
+## Configuration file format 
+Should be json
+```language=Json
+{
+""url"": ""http://127.0.0.1:8080/"",
+""key"": ""your-api-token""
+}
+```
+"
 Class {
 	#name : 'ColombusClient',
 	#superclass : 'Object',
 	#instVars : [
 		'client',
-		'url'
+		'url',
+		'jsonConf',
+		'apiToken'
 	],
 	#category : 'VespucciNotebookElementExtractor-API',
 	#package : 'VespucciNotebookElementExtractor',
@@ -11,11 +44,49 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
+ColombusClient class >> createClientFromConfFile: aConfigFileReference [
+
+	| config jsonConf anUrl apiToken |
+	config := aConfigFileReference asFileReference.
+	jsonConf := (NeoJSONReader on: config readStream) next.
+	anUrl := jsonConf at: 'url'.
+	apiToken := jsonConf at: 'key'.
+
+	^ self new
+		  apiUrl: anUrl;
+		  apiToken: apiToken;
+		  setHeaders;
+		  yourself
+]
+
+{ #category : 'as yet unclassified' }
 ColombusClient class >> createClientWithUrl: anUrl [
 
 	^ self new
 		  apiUrl: anUrl;
 		  yourself
+]
+
+{ #category : 'as yet unclassified' }
+ColombusClient class >> createClientWithUrl: anUrl andKey: anApiKey [
+
+	^ self new
+		  apiUrl: anUrl;
+		  apiToken: anApiKey;
+		  setHeaders;
+		  yourself
+]
+
+{ #category : 'accessing' }
+ColombusClient >> apiToken [
+
+	^ apiToken
+]
+
+{ #category : 'accessing' }
+ColombusClient >> apiToken: anObject [
+
+	apiToken := anObject
 ]
 
 { #category : 'accessing' }
@@ -155,9 +226,17 @@ ColombusClient >> getTypesSgById: atypeSgId [
 ]
 
 { #category : 'as yet unclassified' }
-ColombusClient >> initialize [ 
+ColombusClient >> initialize [
 
-	client :=  ZnClient new forJsonREST; yourself.
-	client headerAt: 'X-API-Token' add: 'profil-platform-token'.
+	client := ZnClient new
+		          forJsonREST;
+		          yourself.
 
+	
+]
+
+{ #category : 'initialization' }
+ColombusClient >> setHeaders [
+
+	apiToken ifNotNil: [ client headerAt: 'X-API-Token' add: apiToken ]
 ]

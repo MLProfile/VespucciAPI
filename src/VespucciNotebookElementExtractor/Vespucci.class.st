@@ -430,7 +430,7 @@ Vespucci >> importsMatchingJson: aJson in: modelImports [
 { #category : 'initialization' }
 Vespucci >> initialize [ 
 
-	colombusClient := ColombusClient createClientWithUrl: 'http://127.0.0.1:8080/'.
+	colombusClient := ColombusClient createClientFromConfFile: '.conf'.
 	localfileReference := FileReference
 		                      newTempFilePrefix: 'pythonModel-'
 		                      suffix: '-export.json'.
