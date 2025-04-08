@@ -509,7 +509,7 @@ Vespucci >> postExportJsonTo: aStream [
 	fullProfileModel notebook_id: notebookId.
 	fullProfileModel project_id: projectId.
 	fullProfileModel name: notebookName. "ToDo: We will want another name here"
-	1halt.
+
 	fullProfileModel sous_graphs: exports.
 	fullProfileModel compositions: compositions.
 
