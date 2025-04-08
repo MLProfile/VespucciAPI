@@ -82,7 +82,8 @@ Class {
 		'projectId',
 		'exports',
 		'seenEntities',
-		'compositions'
+		'compositions',
+		'profileName'
 	],
 	#category : 'VespucciNotebookElementExtractor',
 	#package : 'VespucciNotebookElementExtractor'
@@ -105,6 +106,23 @@ Vespucci class >> fromApiComputeNotebookId: aNotebookId fromProject: aProjectId 
 ]
 
 { #category : 'as yet unclassified' }
+Vespucci class >> fromApiComputeNotebookId: aNotebookId fromProject: aProjectId withProfileName: aString [
+	"Auto build the famix model from sources downloaded on the api"
+
+	^ self new
+		  notebookId: aNotebookId;
+		  projectId: aProjectId;
+		  profileName: aString;
+		  downloadAndBuildFamixModel;
+		  buildFamixModelWithAttributes;
+		  exportToJSON;
+		  exportImports;
+		  exportInvocations;
+		  postExportOnApi;
+		  yourself
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci class >> fromApiExportAsJsonNotebookId: aNotebookId fromProject: aProjectId [
 	"Auto build the famix model from sources downloaded on the api"
 
@@ -112,6 +130,24 @@ Vespucci class >> fromApiExportAsJsonNotebookId: aNotebookId fromProject: aProje
 		  self new
 			  notebookId: aNotebookId;
 			  projectId: aProjectId;
+			  downloadAndBuildFamixModel;
+			  buildFamixModelWithAttributes;
+			  exportToJSON;
+			  exportImports;
+			  exportInvocations;
+			  postExportJsonTo: stream;
+			  yourself ]
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci class >> fromApiExportAsJsonNotebookId: aNotebookId fromProject: aProjectId withProfileName: aString [
+	"Auto build the famix model from sources downloaded on the api"
+
+	^ String streamContents: [ :stream |
+		  self new
+			  notebookId: aNotebookId;
+			  projectId: aProjectId;
+			  profileName: aString;
 			  downloadAndBuildFamixModel;
 			  buildFamixModelWithAttributes;
 			  exportToJSON;
@@ -508,7 +544,7 @@ Vespucci >> postExportJsonTo: aStream [
 	fullProfileModel := ApiModelFullProfile new.
 	fullProfileModel notebook_id: notebookId.
 	fullProfileModel project_id: projectId.
-	fullProfileModel name: notebookName. "ToDo: We will want another name here"
+	fullProfileModel name: profileName. 
 
 	fullProfileModel sous_graphs: exports.
 	fullProfileModel compositions: compositions.
@@ -525,11 +561,25 @@ Vespucci >> postExportOnApi [
 	fullProfileModel := ApiModelFullProfile new.
 	fullProfileModel notebook_id: notebookId.
 	fullProfileModel project_id: projectId.
-	fullProfileModel name: notebookName. "ToDo: We will want another name here"
+	fullProfileModel name: profileName. 
 	fullProfileModel sous_graphs: exports.
 	fullProfileModel compositions: compositions.
 
-	colombusClient createFullProfile: fullProfileModel
+	^colombusClient createFullProfile: fullProfileModel.
+	
+
+]
+
+{ #category : 'accessing' }
+Vespucci >> profileName [
+
+	^ profileName
+]
+
+{ #category : 'accessing' }
+Vespucci >> profileName: anObject [
+
+	profileName := anObject
 ]
 
 { #category : 'accessing' }

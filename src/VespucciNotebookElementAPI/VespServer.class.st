@@ -71,20 +71,21 @@ VespServer >> handleRequest: aRequest [
 	idProject := dict at: 'projectId' ifAbsent: [ 1 halt ].
 	profileName := dict at: 'profileName' ifAbsent: [ 1 halt ].
 
-	^ Vespucci fromApiComputeNotebookId: idNb fromProject: idProject
+	^ Vespucci fromApiComputeNotebookId: idNb fromProject: idProject withProfileName: profileName
 ]
 
 { #category : 'as yet unclassified' }
-VespServer >> registerRoutes [
+VespServer >> registerRoutes [ 
 
-	dispatcher := ZnDispatcherDelegate new.
-	dispatcher map: '/compute' to: [ :request :response |
-		| postData res |
-		res := self handleRequest: request.
+dispatcher := ZnDispatcherDelegate new.
+dispatcher map: '/compute' to: [ :request :response |
+    | postData res |
 
-		response
-			entity: (ZnEntity json: '{"status": "ok"}');
-			yourself ]
+    res := self handleRequest: request. 
+	  
+    response entity: (ZnEntity json: '{"profile": "',(res profileName asString),'"}');
+    yourself.
+].
 ]
 
 { #category : 'accessing' }
