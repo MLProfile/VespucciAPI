@@ -79,11 +79,11 @@ VespServer >> registerRoutes [
 
 dispatcher := ZnDispatcherDelegate new.
 dispatcher map: '/compute' to: [ :request :response |
-    | postData res |
+    | res |
 
     res := self handleRequest: request. 
-	  
-    response entity: (ZnEntity json: '{"profile": "',(res profileName asString),'"}');
+
+    response entity: (ZnEntity json: '{"profile": "',(res newProfileId asString),'"}');
     yourself.
 ].
 ]

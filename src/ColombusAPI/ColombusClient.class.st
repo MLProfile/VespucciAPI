@@ -104,7 +104,8 @@ ColombusClient >> apiUrl: anApiUrl [
 ]
 
 { #category : 'as yet unclassified' }
-ColombusClient >> checkHttpCode: aCode [
+ColombusClient >> checkHttpCode: aCode [ 
+"We need to check for all the get operations (on the post ZnCLient will handle it with ifFail: )"
 
     aCode = 200 ifTrue: [ 
         ^ self inform: 'OK' 
@@ -133,7 +134,7 @@ ColombusClient >> client [
 
 { #category : 'nbElmt' }
 ColombusClient >> createFullProfile: aApiModelFullProfile [
-"
+	"
 test := ApiModelFullProfile new.
 test notebook_id: '2a093105-d80c-4b8b-81af-f6b2fd0c771b'.
 test project_id: '4f2b506d-0817-4b73-bcef-247f77d63985'.
@@ -141,7 +142,9 @@ test name: 'test'.
 test sous_graphs: jsonExport. 
 "
 
-	^ client post: url,'core/api/profiles' contents: aApiModelFullProfile asDictionary. 
+	^ client
+		  post: url , 'core/api/profiles'
+		  contents: aApiModelFullProfile asDictionary
 ]
 
 { #category : 'sousGraph' }
@@ -184,7 +187,7 @@ ColombusClient >> getSgTypeIdByValue: aSgTypeValue [
 
 	| res |
 	res := client get: url,'vespucci/api/typesgs/value/', aSgTypeValue asString.
-
+	
 	self client isSuccess ifFalse: [
 		| req code |
 		req := self client.
@@ -198,8 +201,7 @@ ColombusClient >> getSgTypeIdByValue: aSgTypeValue [
 ColombusClient >> getTypesSg [
 
 	| res |
-	client headerAt: 'X-API-Token' add: 'profil-platform-token'.
-	res := client get: url , 'vespucci/api/typesgs' .
+	res := client get: url , 'vespucci/api/typesgs'.
 
 	self client isSuccess ifFalse: [
 		| req code |
