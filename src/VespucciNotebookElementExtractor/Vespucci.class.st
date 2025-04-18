@@ -179,7 +179,7 @@ export := (NeoJSONReader on: aFileReference readStream) next.
 { #category : 'as yet unclassified' }
 Vespucci >> buildExportImportFor: aFamixImport withJson: jsonDict [
 
-	| exportObject lineStart lineEnd lineSource startPos endPos funcSource sgTypeId |
+	| exportObject lineStart lineEnd lineSource startPos endPos sgTypeId |
 	
 	"Récupération des informations sources"
 	lineStart := aFamixImport sourceAnchor startLine.
@@ -196,7 +196,7 @@ Vespucci >> buildExportImportFor: aFamixImport withJson: jsonDict [
 	exportObject := ApiModelNbElmntAndSg new.
 	exportObject type_sg_id: sgTypeId;
 	             notebook_id: notebookId;
-	             step_name: 'import';
+	             step_name: 'Library Loading';
 	             value: jsonDict.
 	
 
@@ -239,7 +239,7 @@ Vespucci >> buildExportObjectFor: aFamixInvocation withJson: jsonDict [
 	exportObject := ApiModelNbElmntAndSg new.
 	exportObject type_sg_id: sgTypeId;
 	             notebook_id: notebookId;
-	             step_name: 'other';
+	             step_name: 'Other';
 	             value: jsonDict.
 	funcSource 
 		ifNotNil: [ exportObject source: funcSource , String cr , lineSource ]
