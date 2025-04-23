@@ -78,7 +78,7 @@ VespServer >> handleRequest: aRequest [
 VespServer >> registerRoutes [ 
 
 dispatcher := ZnDispatcherDelegate new.
-dispatcher map: '/compute' to: [ :request :response |
+dispatcher map: '/parse' to: [ :request :response |
     | res |
 
     res := self handleRequest: request. 
