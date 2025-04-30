@@ -192,6 +192,15 @@ Vespucci >> buildExportImportFor: aFamixImport withJson: jsonDict [
 	"Récupération du type SG"
 	sgTypeId := colombusClient getSgTypeIdByValue: (jsonDict at: 'FM3').
 
+	self flag: #TODO.
+	"Suppression des champs inutile du sg pour le moment"
+	jsonDict removeKey: 'importingEntity' ifAbsent: [  ].
+	jsonDict removeKey: 'id' ifAbsent: [  ].
+	jsonDict removeKey: 'endPos' ifAbsent: [  ].
+	jsonDict removeKey: 'startPos' ifAbsent: [  ].
+	jsonDict removeKey: 'importedEntity' ifAbsent: [  ].
+	
+
 	"Construction de l'objet"
 	exportObject := ApiModelNbElmntAndSg new.
 	exportObject type_sg_id: sgTypeId;
@@ -234,12 +243,22 @@ Vespucci >> buildExportObjectFor: aFamixInvocation withJson: jsonDict [
 
 	"Récupération du type SG"
 	sgTypeId := colombusClient getSgTypeIdByValue: (jsonDict at: 'FM3').
+	
+	self flag: #TODO.
+	"Suppression des champs inutile du sg pour le moment"
+	jsonDict removeKey: 'candidates' ifAbsent: [  ].
+	jsonDict removeKey: 'id' ifAbsent: [  ].
+	jsonDict removeKey: 'endPos' ifAbsent: [  ].
+	jsonDict removeKey: 'startPos' ifAbsent: [  ].
+	jsonDict removeKey: 'sender' ifAbsent: [  ].
 
 	"Construction de l'objet"
 	exportObject := ApiModelNbElmntAndSg new.
+	
+	"Ajouter une requete pour recuperer le sg equivalent, si on en a un on utilise son step_name consolidé. Si on en a pas, on renvoi Others (pour le moment on peut regarder si on trouve les stepimpl du llm)"
 	exportObject type_sg_id: sgTypeId;
 	             notebook_id: notebookId;
-	             step_name: 'Other';
+	             step_name: 'Others';
 	             value: jsonDict.
 	funcSource 
 		ifNotNil: [ exportObject source: funcSource , String cr , lineSource ]
