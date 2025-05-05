@@ -226,7 +226,7 @@ Vespucci >> buildExportObjectFor: aFamixInvocation withJson: jsonDict [
 	"Construit et renvoie un ApiModelNbElmntAndSg configuré 
 	en fonction de l'invocation aFamixInvocation et du dictionnaire jsonDict."
 
-	| exportObject lineStart lineEnd lineSource startPos endPos funcSource sgTypeId |
+	| exportObject lineStart lineEnd lineSource startPos endPos funcSource sgTypeId sgStepQuery step |
 	
 	"Récupération des informations sources"
 	lineStart := aFamixInvocation sourceAnchor startLine.
@@ -256,9 +256,14 @@ Vespucci >> buildExportObjectFor: aFamixInvocation withJson: jsonDict [
 	exportObject := ApiModelNbElmntAndSg new.
 	
 	"Ajouter une requete pour recuperer le sg equivalent, si on en a un on utilise son step_name consolidé. Si on en a pas, on renvoi Others (pour le moment on peut regarder si on trouve les stepimpl du llm)"
+	
+	
+	sgStepQuery := Dictionary new at: 'sg_type' put: sgTypeId; at: 'sous_graph' put: jsonDict; yourself.
+	step := colombusClient getStepImplFor: sgStepQuery.
+
 	exportObject type_sg_id: sgTypeId;
 	             notebook_id: notebookId;
-	             step_name: 'Others';
+	             step_name: step;
 	             value: jsonDict.
 	funcSource 
 		ifNotNil: [ exportObject source: funcSource , String cr , lineSource ]

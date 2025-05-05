@@ -143,7 +143,7 @@ test sous_graphs: jsonExport.
 "
 
 	^ client
-		  post: url , 'core/api/profiles'
+		  post: url , 'vespucci/api/profile'
 		  contents: aApiModelFullProfile asDictionary
 ]
 
@@ -195,6 +195,23 @@ ColombusClient >> getSgTypeIdByValue: aSgTypeValue [
 		self checkHttpCode: code ].
 
 	^ res at: 'id'
+]
+
+{ #category : 'as yet unclassified' }
+ColombusClient >> getStepImplFor: aFamixSousGraph [
+
+self flag: #TODO.
+	^ client
+		  post: url , 'vespucci/api/sg/search'
+		  contents: aFamixSousGraph 
+]
+
+{ #category : 'as yet unclassified' }
+ColombusClient >> getStepImplNameFor: aSgStepQuery [
+
+	^ client
+		  post: url , 'vespucci/api/sg/search'
+		  contents: aSgStepQuery 
 ]
 
 { #category : 'sousGraph' }
