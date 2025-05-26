@@ -251,7 +251,9 @@ Vespucci >> buildExportObjectFor: aFamixInvocation withJson: jsonDict [
 	jsonDict removeKey: 'endPos' ifAbsent: [  ].
 	jsonDict removeKey: 'startPos' ifAbsent: [  ].
 	jsonDict removeKey: 'sender' ifAbsent: [  ].
-
+	jsonDict removeKey: 'arguments' ifAbsent: [  ].
+	jsonDict removeKey: 'signature' ifAbsent: [  ].
+	
 	"Construction de l'objet"
 	exportObject := ApiModelNbElmntAndSg new.
 	
