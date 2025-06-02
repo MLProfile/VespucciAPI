@@ -7,7 +7,8 @@ Class {
 		'notebook_id',
 		'sous_graphs',
 		'json_profile',
-		'compositions'
+		'compositions',
+		'famix_model'
 	],
 	#category : 'ColombusAPI',
 	#package : 'ColombusAPI'
@@ -19,6 +20,7 @@ ApiModelFullProfile >> asDictionary [
 	^ Dictionary new
 		  at: 'name' put: name;
 		  at: 'notebook_id' put: notebook_id;
+		  at: 'famix_model' put: famix_model;
 		  at: 'project_id' put: project_id;
 		  at: 'json_profile' put: json_profile asDictionary;
 		  at: 'sous_graphs' put: sous_graphs;
@@ -38,6 +40,18 @@ ApiModelFullProfile >> compositions: anObject [
 	compositions := anObject
 ]
 
+{ #category : 'accessing' }
+ApiModelFullProfile >> famix_model [
+
+	^ famix_model
+]
+
+{ #category : 'accessing' }
+ApiModelFullProfile >> famix_model: anObject [
+
+	famix_model := anObject
+]
+
 { #category : 'initialization' }
 ApiModelFullProfile >> initialize [
 
@@ -45,6 +59,7 @@ ApiModelFullProfile >> initialize [
 	project_id := nil.
 	notebook_id := nil.
 	json_profile := {}.
+	famix_model := {}.
 	sous_graphs := nil.
 	compositions := nil
 ]
