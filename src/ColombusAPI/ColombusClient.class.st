@@ -182,6 +182,14 @@ ColombusClient >> getNotebookById: aNotebookId [
 	^ res
 ]
 
+{ #category : 'as yet unclassified' }
+ColombusClient >> getSgTemplatesByPatternName: aRequest [
+
+	^ client
+		  post: url , 'vespucci/api/sg/search'
+		  contents: aRequest 
+]
+
 { #category : 'step' }
 ColombusClient >> getSgTypeIdByValue: aSgTypeValue [
 

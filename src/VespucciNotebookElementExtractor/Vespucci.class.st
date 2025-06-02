@@ -466,42 +466,37 @@ Vespucci >> exportToJSON [
 ]
 
 { #category : 'as yet unclassified' }
-Vespucci >> exportWithPatternProcessor [ 
-    | processor |
+Vespucci >> exportWithPatternProcessor [
 
-    processor := SGProcessor new.
-    processor
-        taggedModel: taggedModel
-        jsonFile: localfileReference
-        notebookName: notebookName.
+	| processor factory |
+	processor := SGProcessor new.
+	processor
+		taggedModel: taggedModel
+		jsonFile: localfileReference
+		notebookName: notebookName.
 
-    processor addPattern: ImportPattern new.
-    processor addPattern: InvocationPattern new.
-   processor addPattern: InvocationPatternWithAttr new.
-"Attention les comparaison sont sensible a la casse, les espaces par exemple "
-"Il faut transformer les = en contain pour que la comparaison sur des sg plus large fonctionne encore"
+	processor addPattern: ImportPattern new.
+	processor addPattern: InvocationPattern new.
+	processor addPattern: InvocationPatternWithAttr new.
 
-    processor tagger addTemplate: (SGTemplate new
-        name: 'shouldAppear';
-        tag: 'shouldAppear';
-        priority: 100;
-        matchBlock: [ :d | (NeoJSONWriter toString: (d at: 'value' ifAbsent: [''])) = '{"library":"numpy","function":"unique","arguments":"y_train"}' ]).
+	factory := SGTemplateFactory initializeWithClient: colombusClient.
+	(factory buildTemplatesFromDbForPattern: (Dictionary new
+			  at: 'sg_type_name' put: 'Invocation';
+			  at: 'project_id' put: self projectId;
+			  yourself)) do: [ :tpl | processor tagger addTemplate: tpl ].
+	(factory buildTemplatesFromDbForPattern: (Dictionary new
+			  at: 'sg_type_name' put: 'InvocationAndAttributes';
+			  at: 'project_id' put: self projectId;
+			  yourself)) do: [ :tpl | processor tagger addTemplate: tpl ].
 
 
-    processor tagger addTemplate: (SGTemplate new
-        name: 'PlotLedgend';
-        tag: 'Vizualization';
-        priority: 90;
-        matchBlock: [ :d | (NeoJSONWriter toString: (d at: 'value' ifAbsent: [''])) = '{"library":"matplotlib.pyplot","function":"legend"}' ]).
-
-    processor tagger addTemplate: (SGTemplate new
-        name: 'ImportGeneric';
-        tag: 'Library Loading';
-        priority: 50;
-        matchBlock: [ :d | (d at: 'FM3') = 'Famix-Python-Entities.Import' ]).
-
-    exports := processor extractTaggedSubGraphs.
-
+	processor tagger addTemplate: (SGTemplate new
+			 name: 'ImportGeneric';
+			 tag: 'Library Loading';
+			 priority: 0;
+			 matchBlock: [ :d | (d at: 'FM3') = 'Famix-Python-Entities.Import' ]).
+	1 halt.
+	exports := processor extractTaggedSubGraphs
 ]
 
 { #category : 'accessing' }
