@@ -159,6 +159,22 @@ Vespucci class >> fromApiExportAsJsonNotebookId: aNotebookId fromProject: aProje
 ]
 
 { #category : 'as yet unclassified' }
+Vespucci class >> wipfromApiComputeNotebookId: aNotebookId fromProject: aProjectId withProfileName: aString [
+	"Auto build the famix model from sources downloaded on the api"
+
+	^ self new
+		  notebookId: aNotebookId;
+		  projectId: aProjectId;
+		  profileName: aString;
+		  downloadAndBuildFamixModel;
+		  buildFamixModelWithAttributes;
+		  exportToJSON;
+		  exportWithPatternProcessor;
+		  postExportOnApi;
+		  yourself
+]
+
+{ #category : 'as yet unclassified' }
 Vespucci >> allImportInAJsonExportedModel: aFileReference [
 "Return each import found in the json"
 
@@ -447,6 +463,45 @@ Vespucci >> exportToJSON [
 	localfileReference writeStreamDo: [ :aStream |
 		taggedModel exportToJSONStream: aStream ].
 	^ localfileReference
+]
+
+{ #category : 'as yet unclassified' }
+Vespucci >> exportWithPatternProcessor [ 
+    | processor |
+
+    processor := SGProcessor new.
+    processor
+        taggedModel: taggedModel
+        jsonFile: localfileReference
+        notebookName: notebookName.
+
+    processor addPattern: ImportPattern new.
+    processor addPattern: InvocationPattern new.
+   processor addPattern: InvocationPatternWithAttr new.
+"Attention les comparaison sont sensible a la casse, les espaces par exemple "
+"Il faut transformer les = en contain pour que la comparaison sur des sg plus large fonctionne encore"
+
+    processor tagger addTemplate: (SGTemplate new
+        name: 'shouldAppear';
+        tag: 'shouldAppear';
+        priority: 100;
+        matchBlock: [ :d | (NeoJSONWriter toString: (d at: 'value' ifAbsent: [''])) = '{"library":"numpy","function":"unique","arguments":"y_train"}' ]).
+
+
+    processor tagger addTemplate: (SGTemplate new
+        name: 'PlotLedgend';
+        tag: 'Vizualization';
+        priority: 90;
+        matchBlock: [ :d | (NeoJSONWriter toString: (d at: 'value' ifAbsent: [''])) = '{"library":"matplotlib.pyplot","function":"legend"}' ]).
+
+    processor tagger addTemplate: (SGTemplate new
+        name: 'ImportGeneric';
+        tag: 'Library Loading';
+        priority: 50;
+        matchBlock: [ :d | (d at: 'FM3') = 'Famix-Python-Entities.Import' ]).
+
+    exports := processor extractTaggedSubGraphs.
+
 ]
 
 { #category : 'accessing' }

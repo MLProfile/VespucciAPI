@@ -71,7 +71,7 @@ VespServer >> handleRequest: aRequest [
 	idProject := dict at: 'projectId' ifAbsent: [ 1 halt ].
 	profileName := dict at: 'profileName' ifAbsent: [ 1 halt ].
 
-	^ Vespucci fromApiComputeNotebookId: idNb fromProject: idProject withProfileName: profileName.
+	^ Vespucci wipfromApiComputeNotebookId: idNb fromProject: idProject withProfileName: profileName.
 
 
 ]
