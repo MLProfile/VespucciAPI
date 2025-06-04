@@ -34,8 +34,10 @@ ApiProxy >> getJsonFrom: aPath [
     self client isSuccess ifFalse: [
         1halt.
     ].
-    json := NeoJSONReader fromString: (res asString).
-    ^ json
+1halt.
+"    (FileSystem workingDirectory / 'monFichier.txt') writeStreamDo: [ :stream | stream nextPutAll: res asString ].
+    json := NeoJSONReader fromString: (res asString)."
+    ^ res
 ]
 
 { #category : 'initialization' }

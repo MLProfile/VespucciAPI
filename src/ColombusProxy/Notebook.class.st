@@ -7,7 +7,8 @@ Class {
 		'url',
 		'project',
 		'elements',
-		'profile'
+		'profile',
+		'notebookModel'
 	],
 	#category : 'ColombusProxy',
 	#package : 'ColombusProxy'
@@ -65,6 +66,16 @@ Notebook >> name [
 Notebook >> name: anObject [
 
 	name := anObject
+]
+
+{ #category : 'accessing' }
+Notebook >> notebookModel [
+    notebookModel isNil ifTrue: [
+        | json |
+        json := self getJsonFrom: 'notebooks/', id asString, '/model'.
+        notebookModel := NotebookModel fromJson: json notebook: self.
+    ].
+    ^ notebookModel
 ]
 
 { #category : 'accessing' }
