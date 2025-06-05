@@ -647,7 +647,7 @@ Vespucci >> postExportOnApi [
 	"After calling self exportImport or exportInvocations we can post those entities to the Colombus api"
 
 	| fullProfileModel res |
-	1halt.
+
 	fullProfileModel := ApiModelFullProfile new.
 	fullProfileModel famix_model:  (NeoJSONReader fromString: localfileReference contents). 
 	fullProfileModel notebook_id: notebookId.

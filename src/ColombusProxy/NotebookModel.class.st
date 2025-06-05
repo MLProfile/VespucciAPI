@@ -43,6 +43,14 @@ NotebookModel >> internalValue: anObject [
 	internalValue := anObject
 ]
 
+{ #category : 'installing' }
+NotebookModel >> load [
+
+	| stream |
+	stream := NeoJSONWriter toJSONReadStream: internalValue.
+	^ FamixPythonModel new importFromJSONStream: stream
+]
+
 { #category : 'as yet unclassified' }
 NotebookModel >> modelAsJson [ 
 
