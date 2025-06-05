@@ -34,6 +34,84 @@ CAPNotebook class >> fromJson: aDict project: aProject [
         yourself.
 ]
 
+{ #category : 'as yet unclassified' }
+CAPNotebook >> allMetaStep [
+
+	^ self elements flatCollect: [ :e | e stepImpls collect: [:stepimpl | stepimpl metaStep] ]
+]
+
+{ #category : 'as yet unclassified' }
+CAPNotebook >> allProjectStepImpl [
+
+ ^ self allSousGraph collect: [ :sg | sg notebookElements flatCollect: [ :nbe | nbe stepImpls ]]
+]
+
+{ #category : 'as yet unclassified' }
+CAPNotebook >> allSousGraph [
+
+	| seenIds result |
+	seenIds := Set new.
+	result := OrderedCollection new.
+	self elements do: [ :e |
+			| sg |
+			sg := e sousGraph.
+			(sg notNil and: [ (seenIds includes: sg id) not ]) ifTrue: [
+					seenIds add: sg id.
+					result add: sg ] ].
+	^ result
+]
+
+{ #category : 'as yet unclassified' }
+CAPNotebook >> allStepImpl [
+
+	^ self elements flatCollect: [ :e | e stepImpls ]
+]
+
+{ #category : 'as yet unclassified' }
+CAPNotebook >> detectNewInconsistenciesByMetaStep [
+
+	| newInconsistencies seenSGs |
+	newInconsistencies := OrderedCollection new.
+	seenSGs := Set new.
+
+	self elements do: [ :nbe |
+			| sg |
+			sg := nbe sousGraph.
+
+			(seenSGs includes: sg) ifFalse: [
+					| allElements groupedByMetaStep |
+					seenSGs add: sg.
+
+					allElements := sg notebookElements.
+					groupedByMetaStep := Dictionary new.
+
+					allElements do: [ :el |
+							el stepImpls do: [ :si |
+									| name |
+									name := si metaStep name.
+									(groupedByMetaStep
+										 at: name
+										 ifAbsentPut: [ OrderedCollection new ]) add: el ] ].
+					"1halt."
+					groupedByMetaStep size > 1 ifTrue: [
+							| newInconsistency |
+							newInconsistency := CAPInconsistency new
+								                    sousGraph: sg;
+								                    description:
+									                    'MetaStep mismatch detected from notebook '
+									                    , self name;
+								                    detectionDate: DateAndTime now;
+								                    yourself.
+
+							(groupedByMetaStep values flatCollect: [ :group | group ]) do: [
+									:el |
+									newInconsistency addElement: el ].
+
+							newInconsistencies add: newInconsistency ] ] ].
+
+	^ newInconsistencies
+]
+
 { #category : 'accessing' }
 CAPNotebook >> elements [
     elements isNil ifTrue: [

@@ -12,7 +12,8 @@ Class {
 		'isComposition',
 		'notebook',
 		'metaInstruction',
-		'stepImpls'
+		'stepImpls',
+		'sousGraph'
 	],
 	#category : 'ColombusProxy',
 	#package : 'ColombusProxy'
@@ -30,6 +31,21 @@ CAPNotebookElement class >> fromJson: aDict notebook: aNotebook [
         function: (aDict at: 'function');
         isComposition: (aDict at: 'is_composition');
         notebook: aNotebook;
+        yourself.
+]
+
+{ #category : 'instance creation' }
+CAPNotebookElement class >> fromJson: aDict sousGraph: aSG [
+    ^ self new
+        id: (aDict at: 'id');
+        startLine: (aDict at: 'start_line');
+        endLine: (aDict at: 'end_line');
+        startPos: (aDict at: 'start_pos');
+        endPos: (aDict at: 'end_pos');
+        library: (aDict at: 'library');
+        function: (aDict at: 'function');
+        isComposition: (aDict at: 'is_composition');
+        sousGraph: aSG;
         yourself.
 ]
 
@@ -107,7 +123,7 @@ CAPNotebookElement >> library: anObject [
 
 { #category : 'accessing' }
 CAPNotebookElement >> metaInstruction [
-    metaInstruction isNil ifTrue: [
+    metaInstruction ifNil: [
         | json |
         json := self getJsonFrom: 'notebookelements/', id asString, '/metainstruction'.
         metaInstruction := CAPMetaInstruction fromJson: json element: self.
@@ -125,6 +141,25 @@ CAPNotebookElement >> notebook [
 CAPNotebookElement >> notebook: anObject [
 
 	notebook := anObject
+]
+
+{ #category : 'accessing' }
+CAPNotebookElement >> sousGraph [
+    sousGraph ifNil: [
+        | json |
+        json := self getJsonFrom: 'notebookelements/', id asString, '/sousgraph'.
+        sousGraph := CAPSousGraph fromJson: json.
+        
+        "Puisque un sous-graph peut etre lié a plusieurs nbElmnt on les charge tous"
+        sousGraph loadNotebookElements
+    ].
+    ^ sousGraph
+]
+
+{ #category : 'accessing' }
+CAPNotebookElement >> sousGraph: anObject [
+
+	sousGraph := anObject. 
 ]
 
 { #category : 'accessing' }
@@ -153,7 +188,7 @@ CAPNotebookElement >> startPos: anObject [
 
 { #category : 'accessing' }
 CAPNotebookElement >> stepImpls [
-    stepImpls isNil ifTrue: [
+    stepImpls ifNil: [
         | json |
         json := self getJsonFrom: 'notebookelements/', id asString, '/stepimpls'.
         stepImpls := json collect: [:each | CAPStepImpl fromJson: each element: self ].

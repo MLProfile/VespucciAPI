@@ -36,6 +36,12 @@ CAPStepImpl class >> fromJson: aDict profile: aProfile [
 ]
 
 { #category : 'accessing' }
+CAPStepImpl >> element [
+
+	^ element 
+]
+
+{ #category : 'accessing' }
 CAPStepImpl >> element: anObject [
 
 	element := anObject
@@ -68,7 +74,7 @@ CAPStepImpl >> metaStep [
     metaStep isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'stepimpls/', id asString, '/metastep'.
-        metaStep := CAPMetaStep fromJson: json
+        metaStep := CAPMetaStep fromJson: json stepImpl: self
     ].
     ^ metaStep
 ]
