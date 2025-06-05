@@ -1,6 +1,6 @@
 Class {
-	#name : 'MetaInstruction',
-	#superclass : 'ApiProxy',
+	#name : 'CAPMetaInstruction',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'algoFamily',
@@ -15,7 +15,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-MetaInstruction class >> fromJson: aDict element: anElement [
+CAPMetaInstruction class >> fromJson: aDict element: anElement [
     ^ self new
         id: (aDict at: 'id');
         algoFamily: (aDict at: 'algo_family');
@@ -27,7 +27,7 @@ MetaInstruction class >> fromJson: aDict element: anElement [
 ]
 
 { #category : 'instance creation' }
-MetaInstruction class >> fromJson: aDict stepImpl: aStep [
+CAPMetaInstruction class >> fromJson: aDict stepImpl: aStep [
     ^ self new
         id: (aDict at: 'id');
         algoName: (aDict at: 'algo_name');
@@ -39,73 +39,73 @@ MetaInstruction class >> fromJson: aDict stepImpl: aStep [
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> algoFamily [
+CAPMetaInstruction >> algoFamily [
 
 	^ algoFamily
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> algoFamily: anObject [
+CAPMetaInstruction >> algoFamily: anObject [
 
 	algoFamily := anObject
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> algoName [
+CAPMetaInstruction >> algoName [
 
 	^ algoName
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> algoName: anObject [
+CAPMetaInstruction >> algoName: anObject [
 
 	algoName := anObject
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> element: anElement [
+CAPMetaInstruction >> element: anElement [
 
 	element := anElement
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> id [
+CAPMetaInstruction >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> id: anObject [
+CAPMetaInstruction >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> numberChildren [
+CAPMetaInstruction >> numberChildren [
 
 	^ numberChildren
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> numberChildren: anObject [
+CAPMetaInstruction >> numberChildren: anObject [
 
 	numberChildren := anObject
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> position [
+CAPMetaInstruction >> position [
 
 	^ position
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> position: anObject [
+CAPMetaInstruction >> position: anObject [
 
 	position := anObject
 ]
 
 { #category : 'accessing' }
-MetaInstruction >> stepImpl: aStepImpls [
+CAPMetaInstruction >> stepImpl: aStepImpls [
 
 	stepImpl:= aStepImpls
 ]

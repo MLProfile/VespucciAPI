@@ -1,6 +1,6 @@
 Class {
-	#name : 'NotebookModel',
-	#superclass : 'ApiProxy',
+	#name : 'CAPNotebookModel',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'notebook',
@@ -11,7 +11,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-NotebookModel class >> fromJson: aDict notebook: aNotebook [
+CAPNotebookModel class >> fromJson: aDict notebook: aNotebook [
     ^ self new
         id: (aDict at: 'id');
         internalValue: (aDict at: 'value');
@@ -20,31 +20,31 @@ NotebookModel class >> fromJson: aDict notebook: aNotebook [
 ]
 
 { #category : 'accessing' }
-NotebookModel >> id [
+CAPNotebookModel >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-NotebookModel >> id: anObject [
+CAPNotebookModel >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'accessing' }
-NotebookModel >> internalValue [
+CAPNotebookModel >> internalValue [
 
 	^ internalValue
 ]
 
 { #category : 'accessing' }
-NotebookModel >> internalValue: anObject [
+CAPNotebookModel >> internalValue: anObject [
 
 	internalValue := anObject
 ]
 
 { #category : 'installing' }
-NotebookModel >> load [
+CAPNotebookModel >> load [
 
 	| stream |
 	stream := NeoJSONWriter toJSONReadStream: internalValue.
@@ -52,13 +52,13 @@ NotebookModel >> load [
 ]
 
 { #category : 'as yet unclassified' }
-NotebookModel >> modelAsJson [ 
+CAPNotebookModel >> modelAsJson [ 
 
  ^ NeoJSONWriter toString: (self internalValue) 
 ]
 
 { #category : 'accessing' }
-NotebookModel >> notebook: anObject [
+CAPNotebookModel >> notebook: anObject [
 
 	notebook := anObject
 ]

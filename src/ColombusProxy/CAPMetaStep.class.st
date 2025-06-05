@@ -1,6 +1,6 @@
 Class {
-	#name : 'MetaStep',
-	#superclass : 'ApiProxy',
+	#name : 'CAPMetaStep',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'name'
@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-MetaStep class >> fromJson: aDict [
+CAPMetaStep class >> fromJson: aDict [
     ^ self new
         id: (aDict at: 'id');
         name: (aDict at: 'name');
@@ -18,25 +18,25 @@ MetaStep class >> fromJson: aDict [
 ]
 
 { #category : 'accessing' }
-MetaStep >> id [
+CAPMetaStep >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-MetaStep >> id: anObject [
+CAPMetaStep >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'accessing' }
-MetaStep >> name [
+CAPMetaStep >> name [
 
 	^ name
 ]
 
 { #category : 'accessing' }
-MetaStep >> name: anObject [
+CAPMetaStep >> name: anObject [
 
 	name := anObject
 ]

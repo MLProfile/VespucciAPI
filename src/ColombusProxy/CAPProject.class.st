@@ -1,6 +1,6 @@
 Class {
-	#name : 'ProjectProxy',
-	#superclass : 'ApiProxy',
+	#name : 'CAPProject',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'name',
@@ -12,7 +12,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-ProjectProxy class >> fromJson: aDict [
+CAPProject class >> fromJson: aDict [
     ^ self new
         id: (aDict at: 'id');
         name: (aDict at: 'name');
@@ -20,51 +20,51 @@ ProjectProxy class >> fromJson: aDict [
 ]
 
 { #category : 'accessing' }
-ProjectProxy >> id [
+CAPProject >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-ProjectProxy >> id: anObject [
+CAPProject >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'as yet unclassified' }
-ProjectProxy >> id: anId name: aName [
+CAPProject >> id: anId name: aName [
     id := anId.
     name := aName.
 ]
 
 { #category : 'accessing' }
-ProjectProxy >> name [
+CAPProject >> name [
 
 	^ name
 ]
 
 { #category : 'accessing' }
-ProjectProxy >> name: anObject [
+CAPProject >> name: anObject [
 
 	name := anObject
 ]
 
 { #category : 'accessing' }
-ProjectProxy >> notebooks [
+CAPProject >> notebooks [
     notebooks isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'projects/', id asString, '/notebooks'.
-        notebooks := json collect: [:each | Notebook fromJson: each project: self ].
+        notebooks := json collect: [:each | CAPNotebook fromJson: each project: self ].
     ].
     ^ notebooks
 ]
 
 { #category : 'accessing' }
-ProjectProxy >> profiles [
+CAPProject >> profiles [
     profiles isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'projects/', id asString, '/profiles'.
-        profiles := json collect: [:each | Profile fromJson: each project: self ].
+        profiles := json collect: [:each | CAPProfile fromJson: each project: self ].
     ].
     ^ profiles
 ]

@@ -1,6 +1,6 @@
 Class {
-	#name : 'StepImplStatus',
-	#superclass : 'ApiProxy',
+	#name : 'CAPStepImplStatus',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'name'
@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-StepImplStatus class >> fromJson: aDict [
+CAPStepImplStatus class >> fromJson: aDict [
     ^ self new
         id: (aDict at: 'id');
         name: (aDict at: 'name');
@@ -18,25 +18,25 @@ StepImplStatus class >> fromJson: aDict [
 ]
 
 { #category : 'accessing' }
-StepImplStatus >> id [
+CAPStepImplStatus >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-StepImplStatus >> id: anObject [
+CAPStepImplStatus >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'accessing' }
-StepImplStatus >> name [
+CAPStepImplStatus >> name [
 
 	^ name
 ]
 
 { #category : 'accessing' }
-StepImplStatus >> name: anObject [
+CAPStepImplStatus >> name: anObject [
 
 	name := anObject
 ]

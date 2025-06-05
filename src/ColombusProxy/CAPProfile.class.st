@@ -1,6 +1,6 @@
 Class {
-	#name : 'Profile',
-	#superclass : 'ApiProxy',
+	#name : 'CAPProfile',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'name',
@@ -14,7 +14,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-Profile class >> fromJson: aDict [
+CAPProfile class >> fromJson: aDict [
     ^ self new
         id: (aDict at: 'id');
         name: (aDict at: 'name');
@@ -23,7 +23,7 @@ Profile class >> fromJson: aDict [
 ]
 
 { #category : 'instance creation' }
-Profile class >> fromJson: aDict project: aProject [
+CAPProfile class >> fromJson: aDict project: aProject [
 
 	^ self new
 		  id: (aDict at: 'id');
@@ -34,69 +34,69 @@ Profile class >> fromJson: aDict project: aProject [
 ]
 
 { #category : 'accessing' }
-Profile >> id [
+CAPProfile >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-Profile >> id: anObject [
+CAPProfile >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'accessing' }
-Profile >> jsonProfile [
+CAPProfile >> jsonProfile [
 
 	^ jsonProfile
 ]
 
 { #category : 'accessing' }
-Profile >> jsonProfile: anObject [
+CAPProfile >> jsonProfile: anObject [
 
 	jsonProfile := anObject
 ]
 
 { #category : 'accessing' }
-Profile >> name [
+CAPProfile >> name [
 
 	^ name
 ]
 
 { #category : 'accessing' }
-Profile >> name: anObject [
+CAPProfile >> name: anObject [
 
 	name := anObject
 ]
 
 { #category : 'accessing' }
-Profile >> notebooks [
+CAPProfile >> notebooks [
     notebooks isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'profiles/', id asString, '/notebooks'.
-        notebooks := json collect: [:each | Notebook fromJson: each profile: self ].
+        notebooks := json collect: [:each | CAPNotebook fromJson: each profile: self ].
     ].
     ^ notebooks
 ]
 
 { #category : 'accessing' }
-Profile >> project [
+CAPProfile >> project [
 
 	^ project
 ]
 
 { #category : 'accessing' }
-Profile >> project: anObject [
+CAPProfile >> project: anObject [
 
 	project := anObject
 ]
 
 { #category : 'accessing' }
-Profile >> stepImpls [
+CAPProfile >> stepImpls [
     stepImpls isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'profiles/', id asString, '/stepimpls'.
-        stepImpls := json collect: [:each | StepImpl fromJson: each profile: self ].
+        stepImpls := json collect: [:each | CAPStepImpl fromJson: each profile: self ].
     ].
     ^ stepImpls
 ]

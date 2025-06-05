@@ -1,5 +1,5 @@
 Class {
-	#name : 'ApiProxy',
+	#name : 'CAPApiProxy',
 	#superclass : 'Object',
 	#instVars : [
 		'client'
@@ -9,39 +9,39 @@ Class {
 }
 
 { #category : 'accessing' }
-ApiProxy class >> apiToken [ 
+CAPApiProxy class >> apiToken [ 
 
 	^ 'profil-platform-token'
 ]
 
 { #category : 'accessing' }
-ApiProxy class >> apiUrl [
+CAPApiProxy class >> apiUrl [
 
 	^ 'http://localhost:8080/'
 ]
 
 { #category : 'accessing' }
-ApiProxy >> client [ 
+CAPApiProxy >> client [ 
 
 ^ client 
 ]
 
 { #category : 'as yet unclassified' }
-ApiProxy >> getJsonFrom: aPath [
+CAPApiProxy >> getJsonFrom: aPath [
     | res json |
     res := self client get: ( self class apiUrl,'vespucci/api/', aPath).
 	"(Delay forMilliseconds: 500) wait."
     self client isSuccess ifFalse: [
         1halt.
     ].
-1halt.
+
 "    (FileSystem workingDirectory / 'monFichier.txt') writeStreamDo: [ :stream | stream nextPutAll: res asString ].
     json := NeoJSONReader fromString: (res asString)."
     ^ res
 ]
 
 { #category : 'initialization' }
-ApiProxy >> initialize [ 
+CAPApiProxy >> initialize [ 
 
 	client := ZnClient new
 		          forJsonREST;

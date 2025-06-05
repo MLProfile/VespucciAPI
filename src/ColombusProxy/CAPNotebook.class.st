@@ -1,6 +1,6 @@
 Class {
-	#name : 'Notebook',
-	#superclass : 'ApiProxy',
+	#name : 'CAPNotebook',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'name',
@@ -15,7 +15,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-Notebook class >> fromJson: aDict profile: aProfile [
+CAPNotebook class >> fromJson: aDict profile: aProfile [
     ^ self new
         id: (aDict at: 'id');
         name: (aDict at: 'name');
@@ -25,7 +25,7 @@ Notebook class >> fromJson: aDict profile: aProfile [
 ]
 
 { #category : 'instance creation' }
-Notebook class >> fromJson: aDict project: aProject [
+CAPNotebook class >> fromJson: aDict project: aProject [
     ^ self new
         id: (aDict at: 'id');
         name: (aDict at: 'name');
@@ -35,85 +35,85 @@ Notebook class >> fromJson: aDict project: aProject [
 ]
 
 { #category : 'accessing' }
-Notebook >> elements [
+CAPNotebook >> elements [
     elements isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'notebooks/', id asString, '/elements'.
-        elements := json collect: [:each | NotebookElement fromJson: each notebook: self ].
+        elements := json collect: [:each | CAPNotebookElement fromJson: each notebook: self ].
     ].
     ^ elements
 ]
 
 { #category : 'accessing' }
-Notebook >> id [
+CAPNotebook >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-Notebook >> id: anObject [
+CAPNotebook >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'accessing' }
-Notebook >> name [
+CAPNotebook >> name [
 
 	^ name
 ]
 
 { #category : 'accessing' }
-Notebook >> name: anObject [
+CAPNotebook >> name: anObject [
 
 	name := anObject
 ]
 
 { #category : 'accessing' }
-Notebook >> notebookModel [
+CAPNotebook >> notebookModel [
     notebookModel isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'notebooks/', id asString, '/model'.
-        notebookModel := NotebookModel fromJson: json notebook: self.
+        notebookModel := CAPNotebookModel fromJson: json notebook: self.
     ].
     ^ notebookModel
 ]
 
 { #category : 'accessing' }
-Notebook >> profile [
+CAPNotebook >> profile [
     profile isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'notebooks/', id asString, '/profile'.
-        profile := Profile fromJson: json.
+        profile := CAPProfile fromJson: json.
     ].
     ^ profile
 ]
 
 { #category : 'accessing' }
-Notebook >> profile: aProfile [ 
+CAPNotebook >> profile: aProfile [ 
 
 	profile := aProfile 
 ]
 
 { #category : 'accessing' }
-Notebook >> project [
+CAPNotebook >> project [
 
 	^ project
 ]
 
 { #category : 'accessing' }
-Notebook >> project: anObject [
+CAPNotebook >> project: anObject [
 
 	project := anObject
 ]
 
 { #category : 'accessing' }
-Notebook >> url [
+CAPNotebook >> url [
 
 	^ url
 ]
 
 { #category : 'accessing' }
-Notebook >> url: anObject [
+CAPNotebook >> url: anObject [
 
 	url := anObject
 ]

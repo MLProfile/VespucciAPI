@@ -1,6 +1,6 @@
 Class {
-	#name : 'NotebookElement',
-	#superclass : 'ApiProxy',
+	#name : 'CAPNotebookElement',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'startLine',
@@ -19,7 +19,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-NotebookElement class >> fromJson: aDict notebook: aNotebook [
+CAPNotebookElement class >> fromJson: aDict notebook: aNotebook [
     ^ self new
         id: (aDict at: 'id');
         startLine: (aDict at: 'start_line');
@@ -34,129 +34,129 @@ NotebookElement class >> fromJson: aDict notebook: aNotebook [
 ]
 
 { #category : 'accessing' }
-NotebookElement >> endLine [
+CAPNotebookElement >> endLine [
 
 	^ endLine
 ]
 
 { #category : 'accessing' }
-NotebookElement >> endLine: anObject [
+CAPNotebookElement >> endLine: anObject [
 
 	endLine := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> endPos [
+CAPNotebookElement >> endPos [
 
 	^ endPos
 ]
 
 { #category : 'accessing' }
-NotebookElement >> endPos: anObject [
+CAPNotebookElement >> endPos: anObject [
 
 	endPos := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> function [
+CAPNotebookElement >> function [
 
 	^ function
 ]
 
 { #category : 'accessing' }
-NotebookElement >> function: anObject [
+CAPNotebookElement >> function: anObject [
 
 	function := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> id [
+CAPNotebookElement >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-NotebookElement >> id: anObject [
+CAPNotebookElement >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> isComposition [
+CAPNotebookElement >> isComposition [
 
 	^ isComposition
 ]
 
 { #category : 'accessing' }
-NotebookElement >> isComposition: anObject [
+CAPNotebookElement >> isComposition: anObject [
 
 	isComposition := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> library [
+CAPNotebookElement >> library [
 
 	^ library
 ]
 
 { #category : 'accessing' }
-NotebookElement >> library: anObject [
+CAPNotebookElement >> library: anObject [
 
 	library := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> metaInstruction [
+CAPNotebookElement >> metaInstruction [
     metaInstruction isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'notebookelements/', id asString, '/metainstruction'.
-        metaInstruction := MetaInstruction fromJson: json element: self.
+        metaInstruction := CAPMetaInstruction fromJson: json element: self.
     ].
     ^ metaInstruction
 ]
 
 { #category : 'accessing' }
-NotebookElement >> notebook [
+CAPNotebookElement >> notebook [
 
 	^ notebook
 ]
 
 { #category : 'accessing' }
-NotebookElement >> notebook: anObject [
+CAPNotebookElement >> notebook: anObject [
 
 	notebook := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> startLine [
+CAPNotebookElement >> startLine [
 
 	^ startLine
 ]
 
 { #category : 'accessing' }
-NotebookElement >> startLine: anObject [
+CAPNotebookElement >> startLine: anObject [
 
 	startLine := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> startPos [
+CAPNotebookElement >> startPos [
 
 	^ startPos
 ]
 
 { #category : 'accessing' }
-NotebookElement >> startPos: anObject [
+CAPNotebookElement >> startPos: anObject [
 
 	startPos := anObject
 ]
 
 { #category : 'accessing' }
-NotebookElement >> stepImpls [
+CAPNotebookElement >> stepImpls [
     stepImpls isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'notebookelements/', id asString, '/stepimpls'.
-        stepImpls := json collect: [:each | StepImpl fromJson: each element: self ].
+        stepImpls := json collect: [:each | CAPStepImpl fromJson: each element: self ].
     ].
     ^ stepImpls
 ]

@@ -1,6 +1,6 @@
 Class {
-	#name : 'StepImpl',
-	#superclass : 'ApiProxy',
+	#name : 'CAPStepImpl',
+	#superclass : 'CAPApiProxy',
 	#instVars : [
 		'id',
 		'position',
@@ -16,7 +16,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-StepImpl class >> fromJson: aDict element: aNotebookElement [
+CAPStepImpl class >> fromJson: aDict element: aNotebookElement [
     ^ self new
         id: (aDict at: 'id');
         position: (aDict at: 'position');
@@ -26,7 +26,7 @@ StepImpl class >> fromJson: aDict element: aNotebookElement [
 ]
 
 { #category : 'instance creation' }
-StepImpl class >> fromJson: aDict profile: aProfile [
+CAPStepImpl class >> fromJson: aDict profile: aProfile [
     ^ self new
         id: (aDict at: 'id');
         position: (aDict at: 'position');
@@ -36,91 +36,91 @@ StepImpl class >> fromJson: aDict profile: aProfile [
 ]
 
 { #category : 'accessing' }
-StepImpl >> element: anObject [
+CAPStepImpl >> element: anObject [
 
 	element := anObject
 ]
 
 { #category : 'accessing' }
-StepImpl >> id [
+CAPStepImpl >> id [
 
 	^ id
 ]
 
 { #category : 'accessing' }
-StepImpl >> id: anObject [
+CAPStepImpl >> id: anObject [
 
 	id := anObject
 ]
 
 { #category : 'accessing' }
-StepImpl >> metaInstructions [
+CAPStepImpl >> metaInstructions [
     metaInstructions isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'stepimpls/', id asString, '/metainstructions'.
-        metaInstructions := json collect: [:each | MetaInstruction fromJson: each stepImpl: self ].
+        metaInstructions := json collect: [:each | CAPMetaInstruction fromJson: each stepImpl: self ].
     ].
     ^ metaInstructions
 ]
 
 { #category : 'accessing' }
-StepImpl >> metaStep [
+CAPStepImpl >> metaStep [
     metaStep isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'stepimpls/', id asString, '/metastep'.
-        metaStep := MetaStep fromJson: json
+        metaStep := CAPMetaStep fromJson: json
     ].
     ^ metaStep
 ]
 
 { #category : 'accessing' }
-StepImpl >> metaStep: anObject [
+CAPStepImpl >> metaStep: anObject [
 
 	metaStep := anObject
 ]
 
 { #category : 'accessing' }
-StepImpl >> numberChildren [
+CAPStepImpl >> numberChildren [
 
 	^ numberChildren
 ]
 
 { #category : 'accessing' }
-StepImpl >> numberChildren: anObject [
+CAPStepImpl >> numberChildren: anObject [
 
 	numberChildren := anObject
 ]
 
 { #category : 'accessing' }
-StepImpl >> position [
+CAPStepImpl >> position [
 
 	^ position
 ]
 
 { #category : 'accessing' }
-StepImpl >> position: anObject [
+CAPStepImpl >> position: anObject [
 
 	position := anObject
 ]
 
 { #category : 'accessing' }
-StepImpl >> profile: anObject [
+CAPStepImpl >> profile: anObject [
 
 	profile := anObject
 ]
 
 { #category : 'accessing' }
-StepImpl >> status [
+CAPStepImpl >> status [
     status isNil ifTrue: [
         | json |
         json := self getJsonFrom: 'stepimpls/', id asString, '/status'.
-        status := StepImplStatus fromJson: json
+        status := CAPStepImplStatus fromJson: json
     ].
     ^ status
 ]
 
 { #category : 'accessing' }
-StepImpl >> status: anObject [
+CAPStepImpl >> status: anObject [
 
 	status := anObject
 ]
