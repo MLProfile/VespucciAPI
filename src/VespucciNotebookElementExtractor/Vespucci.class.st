@@ -477,17 +477,17 @@ Vespucci >> exportWithPatternProcessor [
 
 	processor addPattern: ImportPattern new.
 	processor addPattern: InvocationPattern new.
-	processor addPattern: InvocationPatternWithAttr new.
+"	processor addPattern: InvocationPatternWithAttr new."
 
 	factory := SGTemplateFactory initializeWithClient: colombusClient.
 	(factory buildTemplatesFromDbForPattern: (Dictionary new
 			  at: 'sg_type_name' put: 'Invocation';
 			  at: 'project_id' put: self projectId;
 			  yourself)) do: [ :tpl | processor tagger addTemplate: tpl ].
-	(factory buildTemplatesFromDbForPattern: (Dictionary new
+"	(factory buildTemplatesFromDbForPattern: (Dictionary new
 			  at: 'sg_type_name' put: 'InvocationAndAttributes';
 			  at: 'project_id' put: self projectId;
-			  yourself)) do: [ :tpl | processor tagger addTemplate: tpl ].
+			  yourself)) do: [ :tpl | processor tagger addTemplate: tpl ]."
 
 
 	processor tagger addTemplate: (SGTemplate new
@@ -495,7 +495,7 @@ Vespucci >> exportWithPatternProcessor [
 			 tag: 'Library Loading';
 			 priority: 0;
 			 matchBlock: [ :d | (d at: 'FM3') = 'Famix-Python-Entities.Import' ]).
-	1 halt.
+	"1 halt."
 	exports := processor extractTaggedSubGraphs
 ]
 
@@ -647,9 +647,9 @@ Vespucci >> postExportOnApi [
 	"After calling self exportImport or exportInvocations we can post those entities to the Colombus api"
 
 	| fullProfileModel res |
-	
+	1halt.
 	fullProfileModel := ApiModelFullProfile new.
-	fullProfileModel famix_model: localfileReference contents. 
+	fullProfileModel famix_model:  (NeoJSONReader fromString: localfileReference contents). 
 	fullProfileModel notebook_id: notebookId.
 	fullProfileModel project_id: projectId.
 	fullProfileModel name: profileName. 

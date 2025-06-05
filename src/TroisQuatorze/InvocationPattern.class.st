@@ -22,6 +22,7 @@ InvocationPattern >> jsonElementsFromFile: aFileRef [
 
 { #category : 'as yet unclassified' }
 InvocationPattern >> matchFamixEntityFrom: json in: model [
+"Filter par target name"
     ^ (model allInvocations select: [ :e |
         e sourceAnchor startPos asString = (json at: 'startPos') and:
         [ e sourceAnchor endPos asString = (json at: 'endPos') ]

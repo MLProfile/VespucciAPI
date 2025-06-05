@@ -41,32 +41,38 @@ SGProcessor >> enrichJson: json with: famix andPattern: pattern [
 
 { #category : 'as yet unclassified' }
 SGProcessor >> extractTaggedSubGraphs [
-    | allTagged |
-    allTagged := OrderedCollection new.
-    (patterns sort: [ :a :b | a priority > b priority ]) do: [ :pattern |
-        | jsons isFallback |
-        jsons := pattern jsonElementsFromFile: jsonFileReference.
-        isFallback := pattern priority = (patterns collect: #priority) min.
-        jsons do: [ :json |
-            | famixEntity dict uniqueId tag |
-            famixEntity := pattern matchFamixEntityFrom: json in: taggedModel.
-            famixEntity isNil ifFalse: [
-                uniqueId := famixEntity sourceAnchor startPos asString , '-' , famixEntity sourceAnchor endPos asString.
-                (processedEntities includes: uniqueId) ifFalse: [
-                    dict := self cleanJson: (self enrichJson: json with: famixEntity andPattern: pattern) using: pattern.
-						  dict at: 'value' put: (self extractValueFrom: json using: pattern).
-                    tagger tagSubGraph: dict.
-                    
-                    tag := dict at: 'step_name'.
-                    (tag ~= 'Unknown' or: [ isFallback ]) ifTrue: [
-                        processedEntities add: uniqueId.
-                        allTagged add: dict.
-                    ].
-                ]
-            ]
-        ]
-    ].
-    ^ allTagged.
+
+	| allTagged |
+	allTagged := OrderedCollection new.
+	(patterns sort: [ :a :b | a priority > b priority ]) do: [ :pattern |
+		| jsons isFallback |
+		jsons := pattern jsonElementsFromFile: jsonFileReference.
+		isFallback := pattern priority = (patterns collect: #priority) min.
+		jsons do: [ :json |
+			| famixEntity dict uniqueId tag |
+			famixEntity := pattern matchFamixEntityFrom: json in: taggedModel.
+			famixEntity isNil ifFalse: [
+				uniqueId := famixEntity sourceAnchor startPos asString , '-'
+				            , famixEntity sourceAnchor endPos asString.
+				self flag: #'Peut etre plutot utiliser id famix'.
+				(processedEntities includes: uniqueId) ifFalse: [
+					dict := self
+						        cleanJson:
+						        (self
+							         enrichJson: json
+							         with: famixEntity
+							         andPattern: pattern)
+						        using: pattern.
+					dict
+						at: 'value'
+						put: (self extractValueFrom: json using: pattern).
+					tagger tagSubGraph: dict.
+
+					tag := dict at: 'step_name'.
+					(tag ~= 'Unknown' or: [ isFallback ]) ifTrue: [
+						processedEntities add: uniqueId.
+						allTagged add: dict ] ] ] ] ].
+	^ allTagged
 ]
 
 { #category : 'as yet unclassified' }
