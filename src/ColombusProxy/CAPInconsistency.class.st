@@ -20,6 +20,17 @@ CAPInconsistency >> addElement: anElement [
     elements add: anElement.
 ]
 
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> areLlmInconsistencies [
+""
+
+	
+	
+	^ (self getLlmMetaSteps collect: #id )asSet size > 1.
+	
+	 
+]
+
 { #category : 'accessing' }
 CAPInconsistency >> description [
 
@@ -44,6 +55,17 @@ CAPInconsistency >> detectionDate: anObject [
 	detectionDate := anObject
 ]
 
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> display [
+
+	| dict |
+	dict := self sgValue asDictionary.
+	dict at: 'code' put: self sgCode.
+	dict at: 'nbElmnt' put: self elements size.
+	dict at: 'metaSteps' put: self metaSteps. 
+	^ dict
+]
+
 { #category : 'accessing' }
 CAPInconsistency >> elements [
 
@@ -54,6 +76,29 @@ CAPInconsistency >> elements [
 CAPInconsistency >> elements: anObject [
 
 	elements := anObject
+]
+
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> getLlmInconsistencies [
+	""
+
+	^ self areLlmInconsistencies
+		  ifTrue: [ self ]
+		  ifFalse: [ {  } ]
+]
+
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> getLlmMetaStepNames [
+	""
+
+	^ self getLlmMetaSteps collect: #name
+]
+
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> getLlmMetaSteps [
+	""
+
+	^ self metaSteps collect: #second
 ]
 
 { #category : 'accessing' }
@@ -79,20 +124,24 @@ CAPInconsistency >> isResolved: anObject [
 	isResolved := anObject
 ]
 
-{ #category : 'as yet unclassified' }
-CAPInconsistency >> metaSteps [ 
+{ #category : 'testing' }
+CAPInconsistency >> isVespucciUnknown [ 
 
-	^ self elements collect: [ :e |  e stepImpls collect: [ :si | si metaStep name ]  ].
+	^ (self metaSteps collect: #first) first name = 'Unknown' 
 ]
 
 { #category : 'as yet unclassified' }
-CAPInconsistency >> pp [
+CAPInconsistency >> llmConsistentMetaStep [
 
-	| dict |
-	dict := self sgValue asDictionary.
-	dict at: 'code' put: self sgCode.
-	dict at: 'nbElmnt' put: self elements size.
-	^ dict
+	^ self areLlmInconsistencies
+		  ifTrue: [ ]
+		  ifFalse: [ self getLlmMetaSteps first ]
+]
+
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> metaSteps [ 
+
+	^ self elements collect: [ :e |  e stepImpls collect: [ :si | si metaStep ]  ].
 ]
 
 { #category : 'accessing' }
