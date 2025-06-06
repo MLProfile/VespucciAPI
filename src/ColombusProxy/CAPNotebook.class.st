@@ -69,21 +69,25 @@ CAPNotebook >> allStepImpl [
 
 { #category : 'as yet unclassified' }
 CAPNotebook >> detectNewInconsistenciesByMetaStep [
-  | newInconsistencies seenSGs |
-    newInconsistencies := OrderedCollection new.
-    seenSGs := Set new.
 
-    self elements do: [:nbe |
-        | sg |
-        sg := nbe sousGraph.
+	| newInconsistencies seenSGs |
+	newInconsistencies := OrderedCollection new.
+	seenSGs := Set new.
 
-        (seenSGs includes: sg) ifFalse: [
-	            | allElements groupedByMetaStep |
-            seenSGs add: sg.
+	self elements do: [ :nbe |
+			| sg |
+			sg := nbe sousGraph.
+
+			(seenSGs anySatisfy: [ :seenSg | seenSg id = sg id ]) ifFalse: [ 
+			"(seenSGs includes: sg)  ifFalse: ["
+					| allElements groupedByMetaStep |
+					seenSGs add: sg.
 
 
-            allElements := sg notebookElements.
-            groupedByMetaStep := Dictionary new.
+					allElements := sg notebookElements.
+					groupedByMetaStep := sg notebookElementsByMetaSteps.
+
+					"groupedByMetaStep := Dictionary new.
 
             allElements do: [:el |
                 | uniqueMetaStepNames |
@@ -94,27 +98,24 @@ CAPNotebook >> detectNewInconsistenciesByMetaStep [
                     group := groupedByMetaStep at: name ifAbsentPut: [ OrderedCollection new ].
                     (group includes: el) ifFalse: [ group add: el ].
                 ].
-            ].
+            ]."
+				"	1halt."
+					groupedByMetaStep size > 1 ifTrue: [
+							| newInconsistency |
+							newInconsistency := CAPInconsistency new
+								                    sousGraph: sg;
+								                    description:
+									                    'MetaStep mismatch detected from notebook '
+									                    , self name;
+								                    detectionDate: DateAndTime now;
+								                    yourself.
 
-            groupedByMetaStep size > 1 ifTrue: [
-                | newInconsistency |
-                newInconsistency := CAPInconsistency new
-                    sousGraph: sg;
-                    description: 'MetaStep mismatch detected from notebook ', self name;
-                    detectionDate: DateAndTime now;
-                    yourself.
+							(groupedByMetaStep values flatCollect: [ :group | group ])
+								asSet do: [ :el | newInconsistency addElement: el ].
 
-                ((groupedByMetaStep values flatCollect: [:group | group ]) asSet) do: [:el |
-     
-                    newInconsistency addElement: el.
-                ].
+							newInconsistencies add: newInconsistency ] ] ].
 
-                newInconsistencies add: newInconsistency.
-            ].
-        ].
-    ].
-
-    ^ newInconsistencies
+	^ newInconsistencies
 ]
 
 { #category : 'accessing' }

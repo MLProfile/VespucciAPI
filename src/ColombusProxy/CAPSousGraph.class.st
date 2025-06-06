@@ -83,6 +83,26 @@ CAPSousGraph >> notebookElements [
     ^ notebookElements
 ]
 
+{ #category : 'as yet unclassified' }
+CAPSousGraph >> notebookElementsByMetaSteps [
+
+| groupedByMetaStep |
+groupedByMetaStep := Dictionary new.
+
+            self notebookElements do: [:el |
+                | uniqueMetaStepNames |
+                uniqueMetaStepNames := (el stepImpls collect: [:si | si metaStep name]) asSet.
+
+                uniqueMetaStepNames do: [:name |
+							|group|
+                    group := groupedByMetaStep at: name ifAbsentPut: [ OrderedCollection new ].
+                    (group includes: el) ifFalse: [ group add: el ].
+                ].
+            ].
+
+^ groupedByMetaStep
+]
+
 { #category : 'accessing' }
 CAPSousGraph >> typesg [
     typesg ifNil: [
