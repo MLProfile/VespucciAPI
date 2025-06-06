@@ -69,47 +69,52 @@ CAPNotebook >> allStepImpl [
 
 { #category : 'as yet unclassified' }
 CAPNotebook >> detectNewInconsistenciesByMetaStep [
+  | newInconsistencies seenSGs |
+    newInconsistencies := OrderedCollection new.
+    seenSGs := Set new.
 
-	| newInconsistencies seenSGs |
-	newInconsistencies := OrderedCollection new.
-	seenSGs := Set new.
+    self elements do: [:nbe |
+        | sg |
+        sg := nbe sousGraph.
 
-	self elements do: [ :nbe |
-			| sg |
-			sg := nbe sousGraph.
+        (seenSGs includes: sg) ifFalse: [
+	            | allElements groupedByMetaStep |
+            seenSGs add: sg.
 
-			(seenSGs includes: sg) ifFalse: [
-					| allElements groupedByMetaStep |
-					seenSGs add: sg.
 
-					allElements := sg notebookElements.
-					groupedByMetaStep := Dictionary new.
+            allElements := sg notebookElements.
+            groupedByMetaStep := Dictionary new.
 
-					allElements do: [ :el |
-							el stepImpls do: [ :si |
-									| name |
-									name := si metaStep name.
-									(groupedByMetaStep
-										 at: name
-										 ifAbsentPut: [ OrderedCollection new ]) add: el ] ].
-					"1halt."
-					groupedByMetaStep size > 1 ifTrue: [
-							| newInconsistency |
-							newInconsistency := CAPInconsistency new
-								                    sousGraph: sg;
-								                    description:
-									                    'MetaStep mismatch detected from notebook '
-									                    , self name;
-								                    detectionDate: DateAndTime now;
-								                    yourself.
+            allElements do: [:el |
+                | uniqueMetaStepNames |
+                uniqueMetaStepNames := (el stepImpls collect: [:si | si metaStep name]) asSet.
 
-							(groupedByMetaStep values flatCollect: [ :group | group ]) do: [
-									:el |
-									newInconsistency addElement: el ].
+                uniqueMetaStepNames do: [:name |
+							|group|
+                    group := groupedByMetaStep at: name ifAbsentPut: [ OrderedCollection new ].
+                    (group includes: el) ifFalse: [ group add: el ].
+                ].
+            ].
 
-							newInconsistencies add: newInconsistency ] ] ].
+            groupedByMetaStep size > 1 ifTrue: [
+                | newInconsistency |
+                newInconsistency := CAPInconsistency new
+                    sousGraph: sg;
+                    description: 'MetaStep mismatch detected from notebook ', self name;
+                    detectionDate: DateAndTime now;
+                    yourself.
 
-	^ newInconsistencies
+                ((groupedByMetaStep values flatCollect: [:group | group ]) asSet) do: [:el |
+     
+                    newInconsistency addElement: el.
+                ].
+
+                newInconsistencies add: newInconsistency.
+            ].
+        ].
+    ].
+
+    ^ newInconsistencies
 ]
 
 { #category : 'accessing' }
@@ -120,6 +125,14 @@ CAPNotebook >> elements [
         elements := json collect: [:each | CAPNotebookElement fromJson: each notebook: self ].
     ].
     ^ elements
+]
+
+{ #category : 'as yet unclassified' }
+CAPNotebook >> getLlmInconsistencies [
+
+	| llmInconsistencies |
+	llmInconsistencies := self detectNewInconsistenciesByMetaStep select: #areLlmInconsistencies .
+	^ llmInconsistencies collect: [ :i | i -> i getLlmMetaStepNames ]
 ]
 
 { #category : 'accessing' }

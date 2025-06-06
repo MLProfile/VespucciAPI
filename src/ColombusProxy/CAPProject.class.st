@@ -19,6 +19,12 @@ CAPProject class >> fromJson: aDict [
         yourself.
 ]
 
+{ #category : 'as yet unclassified' }
+CAPProject >> getLlmInconsistenciesFor: aPosition [ 
+
+	^ (self notebooks at: aPosition) getLlmInconsistencies. 
+]
+
 { #category : 'accessing' }
 CAPProject >> id [
 
