@@ -79,6 +79,22 @@ CAPInconsistency >> isResolved: anObject [
 	isResolved := anObject
 ]
 
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> metaSteps [ 
+
+	^ self elements collect: [ :e |  e stepImpls collect: [ :si | si metaStep name ]  ].
+]
+
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> pp [
+
+	| dict |
+	dict := self sgValue asDictionary.
+	dict at: 'code' put: self sgCode.
+	dict at: 'nbElmnt' put: self elements size.
+	^ dict
+]
+
 { #category : 'accessing' }
 CAPInconsistency >> resolutionDate [
 
@@ -89,6 +105,18 @@ CAPInconsistency >> resolutionDate [
 CAPInconsistency >> resolutionDate: anObject [
 
 	resolutionDate := anObject
+]
+
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> sgCode [ 
+	
+	^ self sousGraph code content 
+]
+
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> sgValue [ 
+	
+	^ self sousGraph internalValue 
 ]
 
 { #category : 'accessing' }
