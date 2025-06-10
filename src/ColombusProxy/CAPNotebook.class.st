@@ -120,7 +120,7 @@ CAPNotebook >> detectNewInconsistenciesByMetaStep [
 
 { #category : 'accessing' }
 CAPNotebook >> elements [
-    elements isNil ifTrue: [
+    elements ifNil: [
         | json |
         json := self getJsonFrom: 'notebooks/', id asString, '/elements'.
         elements := json collect: [:each | CAPNotebookElement fromJson: each notebook: self ].
@@ -162,22 +162,22 @@ CAPNotebook >> name: anObject [
 
 { #category : 'accessing' }
 CAPNotebook >> notebookModel [
-    notebookModel isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'notebooks/', id asString, '/model'.
-        notebookModel := CAPNotebookModel fromJson: json notebook: self.
-    ].
-    ^ notebookModel
+
+	notebookModel ifNil: [
+			| json |
+			json := self getJsonFrom: 'notebooks/' , id asString , '/model'.
+			notebookModel := CAPNotebookModel fromJson: json notebook: self ].
+	^ notebookModel
 ]
 
 { #category : 'accessing' }
 CAPNotebook >> profile [
-    profile isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'notebooks/', id asString, '/profile'.
-        profile := CAPProfile fromJson: json.
-    ].
-    ^ profile
+
+	profile ifNil: [
+			| json |
+			json := self getJsonFrom: 'notebooks/' , id asString , '/profile'.
+			profile := CAPProfile fromJson: json ].
+	^ profile
 ]
 
 { #category : 'accessing' }

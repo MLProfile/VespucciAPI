@@ -22,13 +22,8 @@ CAPInconsistency >> addElement: anElement [
 
 { #category : 'as yet unclassified' }
 CAPInconsistency >> areLlmInconsistencies [
-""
 
-	
-	
-	^ (self getLlmMetaSteps collect: #id )asSet size > 1.
-	
-	 
+	^ (self getLlmMetaSteps collect: #id) asSet size > 1
 ]
 
 { #category : 'accessing' }
@@ -60,7 +55,7 @@ CAPInconsistency >> display [
 
 	| dict |
 	dict := self sgValue asDictionary.
-	dict at: 'code' put: self sgCode.
+	dict at: 'code' put: self elementsCode.
 	dict at: 'nbElmnt' put: self elements size.
 	dict at: 'metaSteps' put: self metaSteps. 
 	^ dict
@@ -79,6 +74,12 @@ CAPInconsistency >> elements: anObject [
 ]
 
 { #category : 'as yet unclassified' }
+CAPInconsistency >> elementsCode [ 
+	
+	^ self elements collect: [ :e | e code ]
+]
+
+{ #category : 'as yet unclassified' }
 CAPInconsistency >> getLlmInconsistencies [
 	""
 
@@ -89,7 +90,6 @@ CAPInconsistency >> getLlmInconsistencies [
 
 { #category : 'as yet unclassified' }
 CAPInconsistency >> getLlmMetaStepNames [
-	""
 
 	^ self getLlmMetaSteps collect: #name
 ]
@@ -157,9 +157,15 @@ CAPInconsistency >> resolutionDate: anObject [
 ]
 
 { #category : 'as yet unclassified' }
-CAPInconsistency >> sgCode [ 
-	
-	^ self sousGraph code content 
+CAPInconsistency >> sgCode [
+
+	self
+		deprecated: 'Use elementsCode instead of current one'
+		on: '10 June 2025'
+		in:
+		'Pharo-13.0.0+SNAPSHOT.build.674.sha.e4d88974a939e8af5b66e2032920fa85414cff6f (64 Bit)'.
+
+	^ self sousGraph code content
 ]
 
 { #category : 'as yet unclassified' }

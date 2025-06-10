@@ -71,12 +71,13 @@ CAPProfile >> name: anObject [
 
 { #category : 'accessing' }
 CAPProfile >> notebooks [
-    notebooks isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'profiles/', id asString, '/notebooks'.
-        notebooks := json collect: [:each | CAPNotebook fromJson: each profile: self ].
-    ].
-    ^ notebooks
+
+	notebooks ifNil: [
+			| json |
+			json := self getJsonFrom: 'profiles/' , id asString , '/notebooks'.
+			notebooks := json collect: [ :each |
+				             CAPNotebook fromJson: each profile: self ] ].
+	^ notebooks
 ]
 
 { #category : 'accessing' }
@@ -93,10 +94,11 @@ CAPProfile >> project: anObject [
 
 { #category : 'accessing' }
 CAPProfile >> stepImpls [
-    stepImpls isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'profiles/', id asString, '/stepimpls'.
-        stepImpls := json collect: [:each | CAPStepImpl fromJson: each profile: self ].
-    ].
-    ^ stepImpls
+
+	stepImpls ifNil: [
+			| json |
+			json := self getJsonFrom: 'profiles/' , id asString , '/stepimpls'.
+			stepImpls := json collect: [ :each |
+				             CAPStepImpl fromJson: each profile: self ] ].
+	^ stepImpls
 ]

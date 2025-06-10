@@ -61,22 +61,26 @@ CAPStepImpl >> id: anObject [
 
 { #category : 'accessing' }
 CAPStepImpl >> metaInstructions [
-    metaInstructions isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'stepimpls/', id asString, '/metainstructions'.
-        metaInstructions := json collect: [:each | CAPMetaInstruction fromJson: each stepImpl: self ].
-    ].
-    ^ metaInstructions
+
+	metaInstructions ifNil: [
+			| json |
+			json := self getJsonFrom:
+				        'stepimpls/' , id asString , '/metainstructions'.
+			metaInstructions := json collect: [ :each |
+				                    CAPMetaInstruction
+					                    fromJson: each
+					                    stepImpl: self ] ].
+	^ metaInstructions
 ]
 
 { #category : 'accessing' }
 CAPStepImpl >> metaStep [
-    metaStep isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'stepimpls/', id asString, '/metastep'.
-        metaStep := CAPMetaStep fromJson: json stepImpl: self
-    ].
-    ^ metaStep
+
+	metaStep ifNil: [
+			| json |
+			json := self getJsonFrom: 'stepimpls/' , id asString , '/metastep'.
+			metaStep := CAPMetaStep fromJson: json stepImpl: self ].
+	^ metaStep
 ]
 
 { #category : 'accessing' }
@@ -117,12 +121,12 @@ CAPStepImpl >> profile: anObject [
 
 { #category : 'accessing' }
 CAPStepImpl >> status [
-    status isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'stepimpls/', id asString, '/status'.
-        status := CAPStepImplStatus fromJson: json
-    ].
-    ^ status
+
+	status ifNil: [
+			| json |
+			json := self getJsonFrom: 'stepimpls/' , id asString , '/status'.
+			status := CAPStepImplStatus fromJson: json ].
+	^ status
 ]
 
 { #category : 'accessing' }

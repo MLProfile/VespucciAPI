@@ -32,12 +32,14 @@ CAPSousGraph class >> fromJson: aDict notebookElement: anElement [
 
 { #category : 'accessing' }
 CAPSousGraph >> code [
-    code ifNil: [
-        | json |
-        json := self getJsonFrom: 'sousgraphs/', id asString, '/code'.
-        code := CAPCode fromJson: json sousgraph: self.
-    ].
-    ^ code
+	
+	1halt. 
+	"code will be linked to nbElmnt"
+"	code ifNil: [
+			| json |
+			json := self getJsonFrom: 'sousgraphs/' , id asString , '/code'.
+			code := CAPCode fromJson: json sousgraph: self ].
+	^ code"
 ]
 
 { #category : 'accessing' }
@@ -72,15 +74,20 @@ CAPSousGraph >> internalValue: anObject [
 
 { #category : 'as yet unclassified' }
 CAPSousGraph >> loadNotebookElements [
-    | json |
-    json := self getJsonFrom: 'sousgraphs/', id asString, '/elements'.
-    notebookElements := json collect: [:each | CAPNotebookElement fromJson: each sousGraph: self ].
+
+	| json |
+	json := self getJsonFrom: 'sousgraphs/' , id asString , '/elements'.
+	notebookElements := json collect: [ :each |
+		                    CAPNotebookElement
+			                    fromJson: each
+			                    sousGraph: self ]
 ]
 
 { #category : 'accessing' }
 CAPSousGraph >> notebookElements [
-    notebookElements ifNil: [ self error: 'NotebookElements not loaded' ].
-    ^ notebookElements
+
+	notebookElements ifNil: [ self error: 'NotebookElements not loaded' ].
+	^ notebookElements
 ]
 
 { #category : 'as yet unclassified' }
@@ -105,12 +112,12 @@ groupedByMetaStep := Dictionary new.
 
 { #category : 'accessing' }
 CAPSousGraph >> typesg [
-    typesg ifNil: [
-        | json |
-        json := self getJsonFrom: 'sousgraphs/', id asString, '/typesg'.
-        typesg := CAPTypeSG fromJson: json.
-    ].
-    ^ typesg
+
+	typesg ifNil: [
+			| json |
+			json := self getJsonFrom: 'sousgraphs/' , id asString , '/typesg'.
+			typesg := CAPTypeSG fromJson: json ].
+	^ typesg
 ]
 
 { #category : 'accessing' }

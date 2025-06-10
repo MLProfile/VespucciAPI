@@ -13,7 +13,8 @@ Class {
 		'notebook',
 		'metaInstruction',
 		'stepImpls',
-		'sousGraph'
+		'sousGraph',
+		'code'
 	],
 	#category : 'ColombusProxy',
 	#package : 'ColombusProxy'
@@ -47,6 +48,23 @@ CAPNotebookElement class >> fromJson: aDict sousGraph: aSG [
         isComposition: (aDict at: 'is_composition');
         sousGraph: aSG;
         yourself.
+]
+
+{ #category : 'accessing' }
+CAPNotebookElement >> code [
+
+	code ifNil: [
+			| json |
+			json := self getJsonFrom:
+				        'notebookelements/' , id asString , '/code'.
+			code := CAPCode fromJson: json sousgraph: self ].
+	^ code
+]
+
+{ #category : 'accessing' }
+CAPNotebookElement >> code: aCode [
+
+	code := aCode. 
 ]
 
 { #category : 'accessing' }
@@ -123,12 +141,13 @@ CAPNotebookElement >> library: anObject [
 
 { #category : 'accessing' }
 CAPNotebookElement >> metaInstruction [
-    metaInstruction ifNil: [
-        | json |
-        json := self getJsonFrom: 'notebookelements/', id asString, '/metainstruction'.
-        metaInstruction := CAPMetaInstruction fromJson: json element: self.
-    ].
-    ^ metaInstruction
+
+	metaInstruction ifNil: [
+			| json |
+			json := self getJsonFrom:
+				        'notebookelements/' , id asString , '/metainstruction'.
+			metaInstruction := CAPMetaInstruction fromJson: json element: self ].
+	^ metaInstruction
 ]
 
 { #category : 'accessing' }
@@ -145,15 +164,16 @@ CAPNotebookElement >> notebook: anObject [
 
 { #category : 'accessing' }
 CAPNotebookElement >> sousGraph [
-    sousGraph ifNil: [
-        | json |
-        json := self getJsonFrom: 'notebookelements/', id asString, '/sousgraph'.
-        sousGraph := CAPSousGraph fromJson: json.
-        
-        "Puisque un sous-graph peut etre lié a plusieurs nbElmnt on les charge tous"
-        sousGraph loadNotebookElements
-    ].
-    ^ sousGraph
+
+	sousGraph ifNil: [
+			| json |
+			json := self getJsonFrom:
+				        'notebookelements/' , id asString , '/sousgraph'.
+			sousGraph := CAPSousGraph fromJson: json.
+
+			"Puisque un sous-graph peut etre lié a plusieurs nbElmnt on les charge tous"
+			sousGraph loadNotebookElements ].
+	^ sousGraph
 ]
 
 { #category : 'accessing' }
@@ -188,10 +208,12 @@ CAPNotebookElement >> startPos: anObject [
 
 { #category : 'accessing' }
 CAPNotebookElement >> stepImpls [
-    stepImpls ifNil: [
-        | json |
-        json := self getJsonFrom: 'notebookelements/', id asString, '/stepimpls'.
-        stepImpls := json collect: [:each | CAPStepImpl fromJson: each element: self ].
-    ].
-    ^ stepImpls
+
+	stepImpls ifNil: [
+			| json |
+			json := self getJsonFrom:
+				        'notebookelements/' , id asString , '/stepimpls'.
+			stepImpls := json collect: [ :each |
+				             CAPStepImpl fromJson: each element: self ] ].
+	^ stepImpls
 ]

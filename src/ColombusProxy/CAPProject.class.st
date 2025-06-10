@@ -39,8 +39,9 @@ CAPProject >> id: anObject [
 
 { #category : 'as yet unclassified' }
 CAPProject >> id: anId name: aName [
-    id := anId.
-    name := aName.
+
+	id := anId.
+	name := aName
 ]
 
 { #category : 'accessing' }
@@ -57,20 +58,22 @@ CAPProject >> name: anObject [
 
 { #category : 'accessing' }
 CAPProject >> notebooks [
-    notebooks isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'projects/', id asString, '/notebooks'.
-        notebooks := json collect: [:each | CAPNotebook fromJson: each project: self ].
-    ].
-    ^ notebooks
+
+	notebooks ifNil: [
+			| json |
+			json := self getJsonFrom: 'projects/' , id asString , '/notebooks'.
+			notebooks := json collect: [ :each |
+				             CAPNotebook fromJson: each project: self ] ].
+	^ notebooks
 ]
 
 { #category : 'accessing' }
 CAPProject >> profiles [
-    profiles isNil ifTrue: [
-        | json |
-        json := self getJsonFrom: 'projects/', id asString, '/profiles'.
-        profiles := json collect: [:each | CAPProfile fromJson: each project: self ].
-    ].
-    ^ profiles
+
+	profiles ifNil: [
+			| json |
+			json := self getJsonFrom: 'projects/' , id asString , '/profiles'.
+			profiles := json collect: [ :each |
+				            CAPProfile fromJson: each project: self ] ].
+	^ profiles
 ]
