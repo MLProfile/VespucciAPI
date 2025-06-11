@@ -26,6 +26,23 @@ CAPStepImpl class >> fromJson: aDict element: aNotebookElement [
 ]
 
 { #category : 'instance creation' }
+CAPStepImpl class >> fromJson: aDict element: aNotebookElement withMetaStepJson: aMetaStepDict [
+
+	| stepImpl |
+	stepImpl := self new
+		            id: (aDict at: 'id');
+		            position: (aDict at: 'position');
+		            numberChildren: (aDict at: 'number_children');
+		            element: aNotebookElement;
+		            yourself.
+
+	stepImpl metaStep:
+		(CAPMetaStep fromJson: aMetaStepDict stepImpl: stepImpl).
+
+	^ stepImpl
+]
+
+{ #category : 'instance creation' }
 CAPStepImpl class >> fromJson: aDict profile: aProfile [
     ^ self new
         id: (aDict at: 'id');

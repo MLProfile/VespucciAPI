@@ -108,10 +108,10 @@ VespServer >> registerRoutes [
 				yourself ].
 	dispatcher map: '/inconsistencies' to: [ :request :response |
 			| res |
-			res := self handleInconsistenciesRequest: request
-
-			"response entity: (ZnEntity json: '{""profile"": ""',(res newProfileId asString),'""}');
-    yourself." ]
+			res := self handleInconsistenciesRequest: request.
+			"Ce serait mieux de ollect les id des inconsistences et de les renvoyer"
+			response entity: (ZnEntity json: '{"count": "',(res inconsistencies size asString),'"}');
+    yourself. ]
 ]
 
 { #category : 'accessing' }

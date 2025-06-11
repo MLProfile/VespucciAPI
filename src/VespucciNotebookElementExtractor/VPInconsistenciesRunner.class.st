@@ -64,8 +64,8 @@ VPInconsistenciesRunner >> notebook: anObject [
 { #category : 'as yet unclassified' }
 VPInconsistenciesRunner >> persistInconsistencies [
 
-	inconsistencies .
-	1halt.
+	^ inconsistencies collect: [ :each | each persist ].
+
 ]
 
 { #category : 'accessing' }

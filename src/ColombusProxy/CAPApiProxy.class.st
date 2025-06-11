@@ -48,3 +48,15 @@ CAPApiProxy >> initialize [
 		          yourself.
 	client headerAt: 'X-API-Token' add: self class apiToken 
 ]
+
+{ #category : 'as yet unclassified' }
+CAPApiProxy >> persist [ 
+
+	self subclassResponsibility. 
+]
+
+{ #category : 'as yet unclassified' }
+CAPApiProxy >> toJsonPayload [ 
+
+	self subclassResponsibility. 
+]

@@ -144,6 +144,24 @@ CAPInconsistency >> metaSteps [
 	^ self elements collect: [ :e |  e stepImpls collect: [ :si | si metaStep ]  ].
 ]
 
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> persist [
+
+	| res |
+	res := self client
+		       post: self class apiUrl , 'vespucci/api/inconsistencies'
+		       contents: self toJsonPayload.
+	
+	self id: (res at: 'id').
+	^ res at: 'id'
+]
+
+{ #category : 'accessing' }
+CAPInconsistency >> projectId [ 
+
+	^ self elements first notebook project id
+]
+
 { #category : 'accessing' }
 CAPInconsistency >> resolutionDate [
 
@@ -184,4 +202,22 @@ CAPInconsistency >> sousGraph [
 CAPInconsistency >> sousGraph: anObject [
 
 	sousGraph := anObject
+]
+
+{ #category : 'as yet unclassified' }
+CAPInconsistency >> toJsonPayload [
+    ^ Dictionary new
+        at: 'project_id' put: self projectId asString;
+        at: 'description' put: self description;
+		  at: 'elements' put: (
+            self elements flatCollect: [:el |
+                el stepImpls collect: [:si |
+                    Dictionary new
+                        at: 'notebook_element_id' put: el id asString;
+                        at: 'metastep_id' put: si metaStep id asString;
+                        yourself
+                ]
+            ]
+        );
+        yourself.
 ]

@@ -15,6 +15,15 @@ Class {
 }
 
 { #category : 'instance creation' }
+CAPNotebook class >> fromJson: aDict [ 
+    ^ self new
+        id: (aDict at: 'id');
+        name: (aDict at: 'name');
+        url: (aDict at: 'url');
+        yourself.
+]
+
+{ #category : 'instance creation' }
 CAPNotebook class >> fromJson: aDict profile: aProfile [
     ^ self new
         id: (aDict at: 'id');
@@ -76,10 +85,12 @@ CAPNotebook >> detectNewInconsistenciesByMetaStep [
 
 	self elements do: [ :nbe |
 			| sg |
+			
+			nbe loadSgAndLinkedElemtents.
+			
 			sg := nbe sousGraph.
 
 			(seenSGs anySatisfy: [ :seenSg | seenSg id = sg id ]) ifFalse: [ 
-			"(seenSGs includes: sg)  ifFalse: ["
 					| allElements groupedByMetaStep |
 					seenSGs add: sg.
 
@@ -87,19 +98,7 @@ CAPNotebook >> detectNewInconsistenciesByMetaStep [
 					allElements := sg notebookElements.
 					groupedByMetaStep := sg notebookElementsByMetaSteps.
 
-					"groupedByMetaStep := Dictionary new.
 
-            allElements do: [:el |
-                | uniqueMetaStepNames |
-                uniqueMetaStepNames := (el stepImpls collect: [:si | si metaStep name]) asSet.
-
-                uniqueMetaStepNames do: [:name |
-							|group|
-                    group := groupedByMetaStep at: name ifAbsentPut: [ OrderedCollection new ].
-                    (group includes: el) ifFalse: [ group add: el ].
-                ].
-            ]."
-				"	1halt."
 					groupedByMetaStep size > 1 ifTrue: [
 							| newInconsistency |
 							newInconsistency := CAPInconsistency new
@@ -189,6 +188,10 @@ CAPNotebook >> profile: aProfile [
 { #category : 'accessing' }
 CAPNotebook >> project [
 
+	project ifNil: [
+			| json |
+			json := self getJsonFrom: 'notebook/' , id asString , '/project'.
+			project := CAPProject fromJson: json ].
 	^ project
 ]
 

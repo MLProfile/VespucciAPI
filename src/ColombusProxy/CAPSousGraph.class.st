@@ -30,6 +30,26 @@ CAPSousGraph class >> fromJson: aDict notebookElement: anElement [
         yourself.
 ]
 
+{ #category : 'instance creation' }
+CAPSousGraph class >> fromJson: aSgDict  withJsonElementsAndSteps: aDict [
+
+	^ self new
+		  id: (aSgDict at: 'id');
+		  internalValue: (aSgDict at: 'value');
+		  loadNotebookElementsAndStepsFromDict: aDict ;
+		  yourself
+]
+
+{ #category : 'instance creation' }
+CAPSousGraph class >> fromJson: aDict withJsonelements: aJsonDict [
+
+	^ self new
+		  id: (aDict at: 'id');
+		  internalValue: (aDict at: 'value');
+		  loadNotebookElementsFromDict: aJsonDict;
+		  yourself
+]
+
 { #category : 'accessing' }
 CAPSousGraph >> code [
 	
@@ -83,6 +103,26 @@ CAPSousGraph >> loadNotebookElements [
 			                    sousGraph: self ]
 ]
 
+{ #category : 'as yet unclassified' }
+CAPSousGraph >> loadNotebookElementsAndStepsFromDict: aDict [
+
+	notebookElements := aDict collect: [ :each |
+			                    CAPNotebookElement
+				                    fromJson: (each at: 'element')
+				                    sousGraph: self
+				                    withSteps:
+				                    (each at: 'step_impls_with_metasteps') ]
+]
+
+{ #category : 'as yet unclassified' }
+CAPSousGraph >> loadNotebookElementsFromDict: aDict [
+
+	notebookElements := aDict collect: [ :each |
+		                    CAPNotebookElement
+			                    fromJson: each
+			                    sousGraph: self ]
+]
+
 { #category : 'accessing' }
 CAPSousGraph >> notebookElements [
 
@@ -93,21 +133,29 @@ CAPSousGraph >> notebookElements [
 { #category : 'as yet unclassified' }
 CAPSousGraph >> notebookElementsByMetaSteps [
 
-| groupedByMetaStep |
-groupedByMetaStep := Dictionary new.
+	| groupedByMetaStep |
+	groupedByMetaStep := Dictionary new.
 
-            self notebookElements do: [:el |
-                | uniqueMetaStepNames |
-                uniqueMetaStepNames := (el stepImpls collect: [:si | si metaStep name]) asSet.
+	self notebookElements do: [ :el |
+			self notebookElementsMetaStepNames do: [ :name |
+					| group |
+					group := groupedByMetaStep
+						         at: name
+						         ifAbsentPut: [ OrderedCollection new ].
+					(group includes: el) ifFalse: [ group add: el ] ] ].
 
-                uniqueMetaStepNames do: [:name |
-							|group|
-                    group := groupedByMetaStep at: name ifAbsentPut: [ OrderedCollection new ].
-                    (group includes: el) ifFalse: [ group add: el ].
-                ].
-            ].
+	^ groupedByMetaStep
+]
 
-^ groupedByMetaStep
+{ #category : 'as yet unclassified' }
+CAPSousGraph >> notebookElementsMetaStepNames [
+	"Return all metastep name as set of this SG -> elements -> stepimpls -> metastep "
+
+	self notebookElements do: [ :el |
+			| uniqueMetaStepNames |
+			uniqueMetaStepNames := (el stepImpls collect: [ :si |
+				                        si metaStep name ]) asSet.
+			^ uniqueMetaStepNames ]
 ]
 
 { #category : 'accessing' }

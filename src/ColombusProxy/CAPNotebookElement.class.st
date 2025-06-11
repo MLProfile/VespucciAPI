@@ -50,6 +50,23 @@ CAPNotebookElement class >> fromJson: aDict sousGraph: aSG [
         yourself.
 ]
 
+{ #category : 'instance creation' }
+CAPNotebookElement class >> fromJson: aDict sousGraph: aSG withSteps: aStepsDict [
+
+	^ self new
+		  id: (aDict at: 'id');
+		  startLine: (aDict at: 'start_line');
+		  endLine: (aDict at: 'end_line');
+		  startPos: (aDict at: 'start_pos');
+		  endPos: (aDict at: 'end_pos');
+		  library: (aDict at: 'library');
+		  function: (aDict at: 'function');
+		  isComposition: (aDict at: 'is_composition');
+		  sousGraph: aSG;
+		  stepImplsFromJson: aStepsDict;
+		  yourself
+]
+
 { #category : 'accessing' }
 CAPNotebookElement >> code [
 
@@ -139,6 +156,19 @@ CAPNotebookElement >> library: anObject [
 	library := anObject
 ]
 
+{ #category : 'as yet unclassified' }
+CAPNotebookElement >> loadSgAndLinkedElemtents [
+
+	| json |
+	json := self getJsonFrom:
+		        'notebookelements/' , id asString , '/complete'.
+
+	sousGraph := CAPSousGraph
+		             fromJson: (json at: 'sousgraph')
+		             withJsonElementsAndSteps:
+		             (json at: 'elements_with_stepimpls')
+]
+
 { #category : 'accessing' }
 CAPNotebookElement >> metaInstruction [
 
@@ -153,6 +183,11 @@ CAPNotebookElement >> metaInstruction [
 { #category : 'accessing' }
 CAPNotebookElement >> notebook [
 
+	notebook ifNil: [
+			| json |
+			json := self getJsonFrom:
+				        'notebookelements/' , id asString , '/notebook'.
+			notebook := CAPNotebook fromJson: json ].
 	^ notebook
 ]
 
@@ -168,11 +203,15 @@ CAPNotebookElement >> sousGraph [
 	sousGraph ifNil: [
 			| json |
 			json := self getJsonFrom:
-				        'notebookelements/' , id asString , '/sousgraph'.
-			sousGraph := CAPSousGraph fromJson: json.
+				        'notebookelements/' , id asString , '/sousgraph/elements'.
+
+
+			sousGraph := CAPSousGraph
+				             fromJson: (json at: 'sousgraph')
+				             withJsonelements: (json at: 'elements')
 
 			"Puisque un sous-graph peut etre lié a plusieurs nbElmnt on les charge tous"
-			sousGraph loadNotebookElements ].
+			"sousGraph loadNotebookElements" ].
 	^ sousGraph
 ]
 
@@ -212,8 +251,23 @@ CAPNotebookElement >> stepImpls [
 	stepImpls ifNil: [
 			| json |
 			json := self getJsonFrom:
-				        'notebookelements/' , id asString , '/stepimpls'.
+				        'notebookelements/' , id asString , '/stepimpls/metastep'.
+
 			stepImpls := json collect: [ :each |
-				             CAPStepImpl fromJson: each element: self ] ].
+					             CAPStepImpl
+						             fromJson: (each at: 'step_impl')
+						             element: self
+						             withMetaStepJson: (each at: 'meta_step') ] ].
+
 	^ stepImpls
+]
+
+{ #category : 'as yet unclassified' }
+CAPNotebookElement >> stepImplsFromJson: aDict [
+
+	stepImpls := aDict collect: [ :each |
+					             CAPStepImpl
+						             fromJson: (each at: 'step_impl')
+						             element: self
+						             withMetaStepJson: (each at: 'meta_step') ]
 ]
