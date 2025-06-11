@@ -59,6 +59,23 @@ VespServer >> dispatcher: anObject [
 	dispatcher := anObject
 ]
 
+{ #category : 'as yet unclassified' }
+VespServer >> handleInconsistenciesRequest: aRequest [
+
+	| postData dict idNb idProject |
+
+	postData := aRequest entity contents.
+	dict := (NeoJSONReader on: postData readStream) next.
+
+	"Should handle ifAbsent"
+	idNb := dict at: 'notebookId' ifAbsent: [ 1 halt ].
+	idProject := dict at: 'projectId' ifAbsent: [ 1 halt ].
+
+	^ VPInconsistenciesRunner
+		  fromApiPersistInconsistenciesFromNotebookId: idNb
+		  fromProject: idProject
+]
+
 { #category : 'public' }
 VespServer >> handleRequest: aRequest [
 
@@ -77,17 +94,24 @@ VespServer >> handleRequest: aRequest [
 ]
 
 { #category : 'as yet unclassified' }
-VespServer >> registerRoutes [ 
+VespServer >> registerRoutes [
 
-dispatcher := ZnDispatcherDelegate new.
-dispatcher map: '/parse' to: [ :request :response |
-    | res |
+	dispatcher := ZnDispatcherDelegate new.
+	dispatcher map: '/parse' to: [ :request :response |
+			| res |
+			res := self handleRequest: request.
 
-    res := self handleRequest: request. 
+			response
+				entity:
+					(ZnEntity json:
+							 '{"profile": "' , res newProfileId asString , '"}');
+				yourself ].
+	dispatcher map: '/inconsistencies' to: [ :request :response |
+			| res |
+			res := self handleInconsistenciesRequest: request
 
-    response entity: (ZnEntity json: '{"profile": "',(res newProfileId asString),'"}');
-    yourself.
-].
+			"response entity: (ZnEntity json: '{""profile"": ""',(res newProfileId asString),'""}');
+    yourself." ]
 ]
 
 { #category : 'accessing' }
