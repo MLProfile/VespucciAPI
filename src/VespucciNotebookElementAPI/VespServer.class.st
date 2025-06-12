@@ -20,6 +20,13 @@ Class {
 	#package : 'VespucciNotebookElementAPI'
 }
 
+{ #category : 'class initialization' }
+VespServer class >> initialize [ 
+
+	SessionManager default registerUserClassNamed: self name.
+	
+]
+
 { #category : 'public' }
 VespServer class >> start [
 
@@ -45,6 +52,13 @@ VespServer class >> startOn: aPort [
 	serv server start.
 
 	^ serv
+]
+
+{ #category : 'system startup' }
+VespServer class >> startUp: isImageStarting [
+
+	isImageStarting ifTrue: [
+		Smalltalk vm maxExternalSemaphoresSilently: 65535 ]
 ]
 
 { #category : 'accessing' }
