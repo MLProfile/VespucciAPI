@@ -14,6 +14,29 @@ Class {
 	#package : 'ColombusProxy'
 }
 
+{ #category : 'instance creation' }
+CAPInconsistency class >> fromJson: aDict notebook: aNotebook [
+
+	| inst ids |
+	inst := self new
+		        id: (aDict at: 'id');
+		        description: (aDict at: 'description');
+		        detectionDate:
+			        (DateAndTime fromString: (aDict at: 'detection_date_'));
+		        resolutionDate:
+			        (DateAndTime fromString: (aDict at: 'resolution_date'));
+		        isResolved: (aDict at: 'is_resolved');
+		        yourself.
+
+
+	ids := aDict elements collect: [ :e | e at: 'notebook_element_id' ].
+
+	inst elements:
+		(aNotebook elements select: [ :e | ids includes: e id ]).
+
+	^ inst
+]
+
 { #category : 'adding' }
 CAPInconsistency >> addElement: anElement [
     self elements ifNil: [ elements := OrderedCollection new ].

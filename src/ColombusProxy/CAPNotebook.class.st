@@ -8,7 +8,8 @@ Class {
 		'project',
 		'elements',
 		'profile',
-		'notebookModel'
+		'notebookModel',
+		'inconsistencies'
 	],
 	#category : 'ColombusProxy',
 	#package : 'ColombusProxy'
@@ -145,6 +146,20 @@ CAPNotebook >> id [
 CAPNotebook >> id: anObject [
 
 	id := anObject
+]
+
+{ #category : 'accessing' }
+CAPNotebook >> inconsistencies [
+
+    inconsistencies ifNil: [
+        | json |
+        json := self getJsonFrom: 'notebooks/', id asString, '/inconsistencies'.
+        inconsistencies := json collect: [:each |
+            CAPInconsistency fromJson: each notebook: self
+        ].
+    ].
+    ^ inconsistencies
+
 ]
 
 { #category : 'accessing' }
