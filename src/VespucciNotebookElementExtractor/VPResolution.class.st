@@ -5,22 +5,22 @@ Class {
 		'inconsistency',
 		'metaStep',
 		'notebookElements',
-		'decision'
+		'decisions'
 	],
 	#category : 'VespucciNotebookElementExtractor',
 	#package : 'VespucciNotebookElementExtractor'
 }
 
 { #category : 'accessing' }
-VPResolution >> decision [
+VPResolution >> decisions [
 
-	^ decision
+	^ decisions
 ]
 
 { #category : 'accessing' }
-VPResolution >> decision: anObject [
+VPResolution >> decisions: anObject [
 
-	decision := anObject
+	decisions := anObject
 ]
 
 { #category : 'accessing' }

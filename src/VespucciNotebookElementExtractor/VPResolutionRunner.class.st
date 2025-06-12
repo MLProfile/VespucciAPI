@@ -33,7 +33,7 @@ VPResolutionRunner >> inconsistencies: anObject [
 VPResolutionRunner >> inconsistenciesForNotebook: aNotebook [
 
 	notebook := aNotebook.
-	^ inconsistencies := aNotebook detectNewInconsistenciesByMetaStep
+	^ inconsistencies := aNotebook inconsistencies. 
 ]
 
 { #category : 'initialization' }
@@ -72,6 +72,6 @@ VPResolutionRunner >> resolveInconsistencies [
 	| resolution |
 	inconsistencies do: [ :i |
 			resolution := VPUnknownResolution new resolveInconsistency: i.
-			resolution decision ifNotNil: [
+			resolution decisions ifNotNil: [
 				resolutions add: (VPUnknownResolution new resolveInconsistency: i) ] ]
 ]

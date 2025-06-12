@@ -4,12 +4,40 @@ Class {
 	#instVars : [
 		'solutionText',
 		'inconsistency',
+		'element',
+		'decisionDate',
+		'method',
 		'resolutionType',
-		'metaStep'
+		'oldMetaStep',
+		'newMetaStep'
 	],
 	#category : 'ColombusProxy',
 	#package : 'ColombusProxy'
 }
+
+{ #category : 'accessing' }
+CAPDecision >> decisionDate [
+
+	^ decisionDate
+]
+
+{ #category : 'accessing' }
+CAPDecision >> decisionDate: anObject [
+
+	decisionDate := anObject
+]
+
+{ #category : 'accessing' }
+CAPDecision >> element [
+
+	^ element
+]
+
+{ #category : 'accessing' }
+CAPDecision >> element: anObject [
+
+	element := anObject
+]
 
 { #category : 'accessing' }
 CAPDecision >> inconsistency [
@@ -24,15 +52,39 @@ CAPDecision >> inconsistency: anObject [
 ]
 
 { #category : 'accessing' }
-CAPDecision >> metaStep [
+CAPDecision >> method [
 
-	^ metaStep
+	^ method
 ]
 
 { #category : 'accessing' }
-CAPDecision >> metaStep: anObject [
+CAPDecision >> method: anObject [
 
-	metaStep := anObject
+	method := anObject
+]
+
+{ #category : 'accessing' }
+CAPDecision >> newMetaStep [
+
+	^ newMetaStep
+]
+
+{ #category : 'accessing' }
+CAPDecision >> newMetaStep: anObject [
+
+	newMetaStep := anObject
+]
+
+{ #category : 'accessing' }
+CAPDecision >> oldMetaStep [
+
+	^ oldMetaStep
+]
+
+{ #category : 'accessing' }
+CAPDecision >> oldMetaStep: anObject [
+
+	oldMetaStep := anObject
 ]
 
 { #category : 'accessing' }
