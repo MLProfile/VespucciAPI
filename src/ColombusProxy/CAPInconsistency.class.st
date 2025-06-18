@@ -162,6 +162,14 @@ CAPInconsistency >> llmConsistentMetaStep [
 ]
 
 { #category : 'as yet unclassified' }
+CAPInconsistency >> llmMetaStep [
+	"Should not use second"
+
+	^ self elements collect: [ :each |
+		  each stepImpls second metaStep name ]
+]
+
+{ #category : 'as yet unclassified' }
 CAPInconsistency >> metaSteps [ 
 
 	^ self elements collect: [ :e |  e stepImpls collect: [ :si | si metaStep ]  ].
