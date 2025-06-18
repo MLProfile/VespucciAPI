@@ -4,6 +4,9 @@ Class {
 	#instVars : [
 		'client'
 	],
+	#classInstVars : [
+		'clientShared'
+	],
 	#category : 'ColombusProxy',
 	#package : 'ColombusProxy'
 }
@@ -20,10 +23,29 @@ CAPApiProxy class >> apiUrl [
 	^ 'http://localhost:8080/'
 ]
 
+{ #category : 'initialization' }
+CAPApiProxy class >> client [ 
+
+	clientShared ifNil: [ self initializeClient ].
+	^ clientShared
+]
+
+{ #category : 'initialization' }
+CAPApiProxy class >> initializeClient [
+
+	clientShared := ZnClient new
+		                forJsonREST;
+		                yourself.
+	clientShared headerAt: 'X-API-Token' add: self apiToken
+]
+
 { #category : 'accessing' }
 CAPApiProxy >> client [ 
 
-^ client 
+"^ client "
+
+
+	^ self class client
 ]
 
 { #category : 'as yet unclassified' }
@@ -43,10 +65,10 @@ CAPApiProxy >> getJsonFrom: aPath [
 { #category : 'initialization' }
 CAPApiProxy >> initialize [ 
 
-	client := ZnClient new
+"	client := ZnClient new
 		          forJsonREST;
 		          yourself.
-	client headerAt: 'X-API-Token' add: self class apiToken 
+	client headerAt: 'X-API-Token' add: self class apiToken "
 ]
 
 { #category : 'as yet unclassified' }
