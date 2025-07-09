@@ -1,4 +1,11 @@
 "
+This is a very small and simple server. We define two entry points for vespucci. One to parse, profile and persist a notebook, and one to detect and persist inconsistencies on a notebook to db.
+
+# Routes 
+
+- url:1701/parse
+- url:1701/inconsistencies
+
 # Usage 
 
 ```
@@ -6,7 +13,7 @@ VespServer startOn: 8181.
 ```
 
 ```
-curl -X POST http://localhost:1701/compute -d '{""notebookId"": ""88f4453c-30c7-4341-b3ec-4c0ee03e945e"", ""projectId"": ""4f2b506d-0817-4b73-bcef-247f77d63985"", ""profileName"": ""test""}' -H ""Content-Type: application/json""
+curl -X POST http://localhost:1701/parse -d '{""notebookId"": ""88f4453c-30c7-4341-b3ec-4c0ee03e945e"", ""projectId"": ""4f2b506d-0817-4b73-bcef-247f77d63985"", ""profileName"": ""test""}' -H ""Content-Type: application/json""
 ```
 "
 Class {
@@ -19,13 +26,6 @@ Class {
 	#category : 'VespucciNotebookElementAPI',
 	#package : 'VespucciNotebookElementAPI'
 }
-
-{ #category : 'class initialization' }
-VespServer class >> initialize [ 
-
-	SessionManager default registerUserClassNamed: self name.
-	
-]
 
 { #category : 'public' }
 VespServer class >> start [
@@ -54,13 +54,6 @@ VespServer class >> startOn: aPort [
 	^ serv
 ]
 
-{ #category : 'system startup' }
-VespServer class >> startUp: isImageStarting [
-
-"	isImageStarting ifTrue: [
-		Smalltalk vm maxExternalSemaphoresSilently: 65535 ]"
-]
-
 { #category : 'accessing' }
 VespServer >> dispatcher [
 
@@ -77,13 +70,19 @@ VespServer >> dispatcher: anObject [
 VespServer >> handleInconsistenciesRequest: aRequest [
 
 	| postData dict idNb idProject |
-
 	postData := aRequest entity contents.
 	dict := (NeoJSONReader on: postData readStream) next.
 
 	"Should handle ifAbsent"
-	idNb := dict at: 'notebookId' ifAbsent: [ 1 halt ].
-	idProject := dict at: 'projectId' ifAbsent: [ 1 halt ].
+	idNb := dict
+		        at: 'notebookId'
+		        ifAbsent: [
+		        ^ Error new signal: 'notebook id is missing in the request' ].
+	idProject := dict
+		             at: 'projectId'
+		             ifAbsent: [
+		             ^ Error new signal:
+			               'project id is missing in the request' ].
 
 	^ VPInconsistenciesRunner
 		  fromApiPersistInconsistenciesFromNotebookId: idNb
@@ -91,20 +90,32 @@ VespServer >> handleInconsistenciesRequest: aRequest [
 ]
 
 { #category : 'public' }
-VespServer >> handleRequest: aRequest [
+VespServer >> handleParseRequest: aRequest [
 
 	| postData dict idNb idProject profileName |
 	postData := aRequest entity contents.
 	dict := (NeoJSONReader on: postData readStream) next.
-	
+
 	"Should handle ifAbsent"
-	idNb := dict at: 'notebookId' ifAbsent: [ 1 halt ].
-	idProject := dict at: 'projectId' ifAbsent: [ 1 halt ].
-	profileName := dict at: 'profileName' ifAbsent: [ 1 halt ].
+	idNb := dict
+		        at: 'notebookId'
+		        ifAbsent: [
+		        ^ Error new signal: 'notebook id is missing in the request' ].
+	idProject := dict
+		             at: 'projectId'
+		             ifAbsent: [
+		             ^ Error new signal:
+			               'project id is missing in the request' ].
+	profileName := dict
+		               at: 'profileName'
+		               ifAbsent: [
+		               ^ Error new signal:
+			                 'profile name is missing in the request' ].
 
-	^ Vespucci wipfromApiComputeNotebookId: idNb fromProject: idProject withProfileName: profileName.
-
-
+	^ Vespucci
+		  wipfromApiComputeNotebookId: idNb
+		  fromProject: idProject
+		  withProfileName: profileName
 ]
 
 { #category : 'as yet unclassified' }
@@ -113,7 +124,7 @@ VespServer >> registerRoutes [
 	dispatcher := ZnDispatcherDelegate new.
 	dispatcher map: '/parse' to: [ :request :response |
 			| res |
-			res := self handleRequest: request.
+			res := self handleParseRequest: request.
 
 			response
 				entity:
@@ -124,8 +135,10 @@ VespServer >> registerRoutes [
 			| res |
 			res := self handleInconsistenciesRequest: request.
 			"Ce serait mieux de ollect les id des inconsistences et de les renvoyer"
-			response entity: (ZnEntity json: '{"count": "',(res inconsistencies size asString),'"}');
-    yourself. ]
+			response
+				entity: (ZnEntity json:
+							 '{"count": "' , res inconsistencies size asString , '"}');
+				yourself ]
 ]
 
 { #category : 'accessing' }
