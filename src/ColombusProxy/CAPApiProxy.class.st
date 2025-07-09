@@ -52,13 +52,11 @@ CAPApiProxy >> client [
 CAPApiProxy >> getJsonFrom: aPath [
     | res json |
     res := self client get: ( self class apiUrl,'vespucci/api/', aPath).
-	"(Delay forMilliseconds: 500) wait."
+	
     self client isSuccess ifFalse: [
         1halt.
     ].
 
-"    (FileSystem workingDirectory / 'monFichier.txt') writeStreamDo: [ :stream | stream nextPutAll: res asString ].
-    json := NeoJSONReader fromString: (res asString)."
     ^ res
 ]
 
@@ -75,6 +73,12 @@ CAPApiProxy >> initialize [
 CAPApiProxy >> persist [ 
 
 	self subclassResponsibility. 
+]
+
+{ #category : 'initialization' }
+CAPApiProxy >> reset [ 
+
+	
 ]
 
 { #category : 'as yet unclassified' }
