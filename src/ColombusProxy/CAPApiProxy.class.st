@@ -4,6 +4,9 @@ Class {
 	#instVars : [
 		'client'
 	],
+	#classInstVars : [
+		'clientShared'
+	],
 	#category : 'ColombusProxy',
 	#package : 'ColombusProxy'
 }
@@ -20,39 +23,62 @@ CAPApiProxy class >> apiUrl [
 	^ 'http://localhost:8080/'
 ]
 
+{ #category : 'initialization' }
+CAPApiProxy class >> client [ 
+
+	clientShared ifNil: [ self initializeClient ].
+	^ clientShared
+]
+
+{ #category : 'initialization' }
+CAPApiProxy class >> initializeClient [
+
+	clientShared := ZnClient new
+		                forJsonREST;
+		                yourself.
+	clientShared headerAt: 'X-API-Token' add: self apiToken
+]
+
 { #category : 'accessing' }
 CAPApiProxy >> client [ 
 
-^ client 
+"^ client "
+
+
+	^ self class client
 ]
 
 { #category : 'as yet unclassified' }
 CAPApiProxy >> getJsonFrom: aPath [
     | res json |
     res := self client get: ( self class apiUrl,'vespucci/api/', aPath).
-	"(Delay forMilliseconds: 500) wait."
+	
     self client isSuccess ifFalse: [
         1halt.
     ].
 
-"    (FileSystem workingDirectory / 'monFichier.txt') writeStreamDo: [ :stream | stream nextPutAll: res asString ].
-    json := NeoJSONReader fromString: (res asString)."
     ^ res
 ]
 
 { #category : 'initialization' }
 CAPApiProxy >> initialize [ 
 
-	client := ZnClient new
+"	client := ZnClient new
 		          forJsonREST;
 		          yourself.
-	client headerAt: 'X-API-Token' add: self class apiToken 
+	client headerAt: 'X-API-Token' add: self class apiToken "
 ]
 
 { #category : 'as yet unclassified' }
 CAPApiProxy >> persist [ 
 
 	self subclassResponsibility. 
+]
+
+{ #category : 'initialization' }
+CAPApiProxy >> reset [ 
+
+	
 ]
 
 { #category : 'as yet unclassified' }

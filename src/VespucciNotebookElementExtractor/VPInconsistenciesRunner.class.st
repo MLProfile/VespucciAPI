@@ -64,6 +64,8 @@ VPInconsistenciesRunner >> notebook: anObject [
 { #category : 'as yet unclassified' }
 VPInconsistenciesRunner >> persistInconsistencies [
 
+		"Collect issue with ZnClient ?"
+		"Server Handler Error Instance of ZnClient did not understand #collect:"
 	^ inconsistencies collect: [ :each | each persist ].
 
 ]

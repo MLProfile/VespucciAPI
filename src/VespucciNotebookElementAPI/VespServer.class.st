@@ -57,8 +57,8 @@ VespServer class >> startOn: aPort [
 { #category : 'system startup' }
 VespServer class >> startUp: isImageStarting [
 
-	isImageStarting ifTrue: [
-		Smalltalk vm maxExternalSemaphoresSilently: 65535 ]
+"	isImageStarting ifTrue: [
+		Smalltalk vm maxExternalSemaphoresSilently: 65535 ]"
 ]
 
 { #category : 'accessing' }
