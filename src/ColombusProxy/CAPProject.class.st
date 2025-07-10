@@ -62,6 +62,7 @@ CAPProject >> notebooks [
 	notebooks ifNil: [
 			| json |
 			json := self getJsonFrom: 'projects/' , id asString , '/notebooks'.
+
 			notebooks := json collect: [ :each |
 				             CAPNotebook fromJson: each project: self ] ].
 	^ notebooks

@@ -178,13 +178,14 @@ CAPInconsistency >> metaSteps [
 { #category : 'as yet unclassified' }
 CAPInconsistency >> persist [
 
-	| res |
+	| res content |
 	res := self client
 		       post: self class apiUrl , 'vespucci/api/inconsistencies'
 		       contents: self toJsonPayload.
 	
-	self id: (res at: 'id').
-	^ res at: 'id'
+	content := res contents.
+	self id: (content at: 'id').
+	^ content at: 'id'
 ]
 
 { #category : 'accessing' }

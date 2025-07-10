@@ -88,7 +88,6 @@ CAPNotebook >> detectNewInconsistenciesByMetaStep [
 			| sg |
 			
 			nbe loadSgAndLinkedElemtents.
-			
 			sg := nbe sousGraph.
 
 			(seenSGs anySatisfy: [ :seenSg | seenSg id = sg id ]) ifFalse: [ 
