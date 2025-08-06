@@ -161,7 +161,7 @@ CAPNotebookElement >> loadSgAndLinkedElemtents [
 
 	| json |
 	json := self getJsonFrom:
-		        'notebookelements/' , id asString , '/complete'.
+		        'projects/', self notebook project id asString ,'/notebookelements/' , id asString , '/complete'.
 
 	sousGraph := CAPSousGraph
 		             fromJson: (json at: 'sousgraph')
@@ -195,6 +195,15 @@ CAPNotebookElement >> notebook [
 CAPNotebookElement >> notebook: anObject [
 
 	notebook := anObject
+]
+
+{ #category : 'initialization' }
+CAPNotebookElement >> setReferenceCategory: aCategoryName [
+
+	| res |
+	res := self client post: ('vespucci/api/notebook-element/', self id asString ,'/step-impl/', aCategoryName) contents: {  }.
+	
+
 ]
 
 { #category : 'accessing' }

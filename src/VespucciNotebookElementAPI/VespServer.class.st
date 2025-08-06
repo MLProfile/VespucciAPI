@@ -123,22 +123,31 @@ VespServer >> registerRoutes [
 
 	dispatcher := ZnDispatcherDelegate new.
 	dispatcher map: '/parse' to: [ :request :response |
-			| res |
+		[	| res |
 			res := self handleParseRequest: request.
 
 			response
 				entity:
 					(ZnEntity json:
 							 '{"profile": "' , res newProfileId asString , '"}');
-				yourself ].
+				yourself ] on: Error do: [ :ex |
+        response
+ 				statusLine: (ZnStatusLine internalServerError );
+            entity: (ZnEntity json: '{"error during parsing": "', ex messageText, '"}');
+            yourself ]
+			].
 	dispatcher map: '/inconsistencies' to: [ :request :response |
-			| res |
+			[| res |
 			res := self handleInconsistenciesRequest: request.
 			"Ce serait mieux de ollect les id des inconsistences et de les renvoyer"
 			response
 				entity: (ZnEntity json:
 							 '{"count": "' , res inconsistencies size asString , '"}');
-				yourself ]
+				yourself] on: Error do: [ :ex |
+        response
+ 				statusLine: (ZnStatusLine internalServerError );
+            entity: (ZnEntity json: '{"Error while computing inconsistencies": "', ex messageText, '"}');
+            yourself ]]
 ]
 
 { #category : 'accessing' }

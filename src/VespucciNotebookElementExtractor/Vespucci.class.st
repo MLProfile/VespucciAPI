@@ -135,28 +135,34 @@ Vespucci >> buildFamixModelWithAttributes [
 	model := taggedModel.
 
 	model allImports do: [ :i |
-		i importedEntity
-			ifNotNil: [
-				i importOf: i importedEntity name.
-				i package: i importedEntity libraryName ]
-			ifNil: [
-				1 halt.
-				i importOf: 'parse_error'.
-				i package: 'parse_error' ].
+		"Ajouter un on error do"
+			i importedEntity
+				ifNotNil: [
+						i importOf: i importedEntity name.
+						i package: i importedEntity libraryName ]
+				ifNil: [
+						1 halt.
+						i importOf: 'parse_error'.
+						i package: 'parse_error' ].
 
-		i startPos: i sourceAnchor startPos asString.
-		i endPos: i sourceAnchor endPos asString ].
+			i startPos: i sourceAnchor startPos asString.
+			i endPos: i sourceAnchor endPos asString ].
 
 	self flag: #todo.
 	"If we have a shadowing entity, candidtes may be multiple we should probably check"
 	"We also need to find a way to get the parent package of this candidate"
 	"See with cyril, will be good in some time"
+
+	"New error there when we have a FMSlotMultiValue => sometimes i have nothing, no candidates, no sourceAnchor... "
 	model allInvocations do: [ :i |
-		i function: i candidates first name.
-		i arguments: i computeArgs asStringWithCr.
-		i library: i computePackage asString.
-		i startPos: i sourceAnchor startPos asString.
-		i endPos: i sourceAnchor endPos asString ]
+			[
+				i function: i candidates first name.
+				i arguments: i computeArgs asStringWithCr.
+				i library: i computePackage asString.
+				i startPos: i sourceAnchor startPos asString.
+				i endPos: i sourceAnchor endPos asString ]
+				on: Error
+				do: [ :error |  Transcript show: 'error during invocations extractions ', error messageText; cr. 1halt.] ]
 ]
 
 { #category : 'accessing' }
@@ -180,7 +186,9 @@ Vespucci >> downloadAndBuildFamixModel [
 		                 fromProjectId: projectId
 		                 downloadNotebookId: notebookId.
 	notebookName := fileReference basenameWithoutExtension.
-	taggedModel := FamixPythonImporter import: fileReference
+		1halt.
+	taggedModel := FamixPythonImporter import: fileReference.
+	1halt.
 ]
 
 { #category : 'as yet unclassified' }

@@ -18,6 +18,7 @@ SGTemplateFactory class >> initializeWithClient: aClient [
 SGTemplateFactory >> buildTemplatesFromDbForPattern: aPatternName [
 
 	| rawTemplates res |
+	"Attention pour le moment rien ne nous empeche d'avoir plusieur reference pour un sg"
 	res := colombusClient getSgTemplatesByPatternName: aPatternName. 
 	rawTemplates := res contents.
 	^ rawTemplates collect: [ :templateDict |

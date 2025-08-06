@@ -154,6 +154,8 @@ CAPNotebook >> inconsistencies [
         | json |
         json := self getJsonFrom: 'notebooks/', id asString, '/inconsistencies'.
         inconsistencies := json collect: [:each |
+	"Attention ici notebook ne doit pas etre self, certain elements peuvent ne pas appartenir au notebook courant."
+	
             CAPInconsistency fromJson: each notebook: self
         ].
     ].
