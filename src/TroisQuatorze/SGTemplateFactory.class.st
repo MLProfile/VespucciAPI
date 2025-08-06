@@ -17,9 +17,9 @@ SGTemplateFactory class >> initializeWithClient: aClient [
 { #category : 'as yet unclassified' }
 SGTemplateFactory >> buildTemplatesFromDbForPattern: aPatternName [
 
-	| rawTemplates |
-	rawTemplates := colombusClient getSgTemplatesByPatternName: aPatternName. 
-
+	| rawTemplates res |
+	res := colombusClient getSgTemplatesByPatternName: aPatternName. 
+	rawTemplates := res contents.
 	^ rawTemplates collect: [ :templateDict |
 		  | template |
 		  template := SGTemplate new.

@@ -20,7 +20,8 @@ CAPApiProxy class >> apiToken [
 { #category : 'accessing' }
 CAPApiProxy class >> apiUrl [
 
-	^ 'http://localhost:8080/' "'http://erebe-vm9.i3s.unice.fr:8000/'"
+	^ 'http://localhost:8080/'
+	"^'http://erebe-vm9.i3s.unice.fr:8000/'"
 ]
 
 { #category : 'initialization' }
@@ -34,6 +35,7 @@ CAPApiProxy class >> initializeClient [
 
 	^ clientShared := ZnClient new
 		                  forJsonREST;
+								beOneShot;
 		                  headerAt: 'X-API-Token' add: self apiToken;
 		                  yourself
 ]
@@ -49,15 +51,19 @@ CAPApiProxy >> client [
 
 { #category : 'as yet unclassified' }
 CAPApiProxy >> getJsonFrom: aPath [
-    | res json |
+    | res json jsonContent |
     res := self client get: ( self class apiUrl,'vespucci/api/', aPath).
-	res class = ZnClient ifTrue: [  ^ Error signal: 'something went wrong with the request'  ].
-
-    self client isSuccess ifFalse: [
+	"res class = ZnClient ifTrue: [  ^ Error signal: 'something went wrong with the request'  ]."
+"	1halt."
+	^jsonContent := res contents.
+"	res response clearEntity.
+	res resetEntity. 
+	1halt."
+"    self client isSuccess ifFalse: [
         1halt.
-    ].
+    ]."
 
-    ^ res
+
 ]
 
 { #category : 'initialization' }

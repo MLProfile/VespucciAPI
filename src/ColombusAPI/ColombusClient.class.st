@@ -157,13 +157,14 @@ ColombusClient >> fromProjectId: aProjectID downloadNotebookId: aNotebookId [
 			       url , 'core/api/project/' , aProjectID asString
 			       , '/notebook/' , aNotebookId asString , '/python'.
 
+	
 	"Check if the request went well"
 	localfileReference := FileReference
 		                      newTempFilePrefix: 'pythonCode-'
 		                      suffix: '-download.py'.
 
 	localfileReference writeStreamDo: [ :aStream |
-		aStream nextPutAll: res ].
+		aStream nextPutAll: res contents ].
 	^ localfileReference
 ]
 
