@@ -134,19 +134,24 @@ Vespucci >> buildFamixModelWithAttributes [
 	| model |
 	model := taggedModel.
 
-	model allImports do: [ :i |
-		"Ajouter un on error do"
-			i importedEntity
-				ifNotNil: [
-						i importOf: i importedEntity name.
-						i package: i importedEntity libraryName ]
-				ifNil: [
-						1 halt.
-						i importOf: 'parse_error'.
-						i package: 'parse_error' ].
+	model allImports do: [ :i | "Ajouter un on error do"
+			[
+				i importedEntity
+					ifNotNil: [
+							i importOf: i importedEntity name.
+							i package: i importedEntity libraryName ]
+					ifNil: [ "1 halt."
+							i importOf: 'parse_error'.
+							i package: 'parse_error' ].
 
-			i startPos: i sourceAnchor startPos asString.
-			i endPos: i sourceAnchor endPos asString ].
+				i startPos: i sourceAnchor startPos asString.
+				i endPos: i sourceAnchor endPos asString ]
+				on: Error
+				do: [ :error |
+						Transcript
+							show:
+								'error during invocations extractions ' , error messageText;
+							cr ] ].
 
 	self flag: #todo.
 	"If we have a shadowing entity, candidtes may be multiple we should probably check"
@@ -154,6 +159,7 @@ Vespucci >> buildFamixModelWithAttributes [
 	"See with cyril, will be good in some time"
 
 	"New error there when we have a FMSlotMultiValue => sometimes i have nothing, no candidates, no sourceAnchor... "
+
 	model allInvocations do: [ :i |
 			[
 				i function: i candidates first name.
@@ -162,7 +168,11 @@ Vespucci >> buildFamixModelWithAttributes [
 				i startPos: i sourceAnchor startPos asString.
 				i endPos: i sourceAnchor endPos asString ]
 				on: Error
-				do: [ :error |  Transcript show: 'error during invocations extractions ', error messageText; cr. 1halt.] ]
+				do: [ :error |
+						Transcript
+							show:
+								'error during invocations extractions ' , error messageText;
+							cr ] ]
 ]
 
 { #category : 'accessing' }
@@ -186,9 +196,11 @@ Vespucci >> downloadAndBuildFamixModel [
 		                 fromProjectId: projectId
 		                 downloadNotebookId: notebookId.
 	notebookName := fileReference basenameWithoutExtension.
-		1halt.
+
 	taggedModel := FamixPythonImporter import: fileReference.
-	1halt.
+	
+	(taggedModel allInvocations size = 0) ifTrue: [ Transcript show: 'No invocation found for this notebook : possibly a parsing error'; cr. ].
+	 
 ]
 
 { #category : 'as yet unclassified' }

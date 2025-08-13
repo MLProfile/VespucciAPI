@@ -21,7 +21,7 @@ CAPApiProxy class >> apiToken [
 CAPApiProxy class >> apiUrl [
 
 	^ 'http://localhost:8080/'
-	
+	"^ 'http://host.docker.internal:8080/'"
 	"^'http://erebe-vm9.i3s.unice.fr:8000/'"
 ]
 

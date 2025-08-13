@@ -51,6 +51,7 @@ SGProcessor >> extractTaggedSubGraphs [
 		jsons do: [ :json |
 			| famixEntity dict uniqueId tag |
 			famixEntity := pattern matchFamixEntityFrom: json in: taggedModel.
+			"Ajouter une gestion d'erreur a ce niveau si sourceAnchor est nil"
 			famixEntity isNil ifFalse: [
 				uniqueId := famixEntity sourceAnchor startPos asString , '-'
 				            , famixEntity sourceAnchor endPos asString.
